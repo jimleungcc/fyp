@@ -38,6 +38,4 @@ objectList.append(westwall)
 
 o3d.visualization.draw_geometries(objectList)
 
-
-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
-
+# hello world
