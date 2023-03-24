@@ -24,8 +24,14 @@ closest_points = pcd2_np[closest_indices]
 print(closest_points)
 point2 = o3d.io.read_point_cloud("point2.ply")
 
+print(np.min(distances))
+
+
+
+
+
 objects = [];
-# objects.append(pcd1)
+objects.append(pcd1)
 objects.append(pcd2)
 objects.append(point1)
 objects.append(point2)
