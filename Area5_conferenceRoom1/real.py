@@ -32,11 +32,13 @@ westSide.append(westchair1)
 westSide.append(westchair2)
 westSide.append(westchair3)
 westSide.append(westchair4)
+westSide.append(table)
 
 eastSide = []
 eastSide.append(eastchair1)
 eastSide.append(eastchair2)
 eastSide.append(eastchair3)
+eastSide.append(table)
 
 # dist = westchair1.compute_point_cloud_distance(westwall)
 # print("numpy min:", numpy.min(dist))
@@ -48,8 +50,16 @@ eastSide.append(eastchair3)
 # Get the axis_aligned_bounding_box of the point cloud
 aabb = door.get_axis_aligned_bounding_box()
 # Get the width of the AABB
-width = (aabb.get_max_bound()[0] - aabb.get_min_bound()[0]) / 2
+width = (aabb.get_max_bound()[0] - aabb.get_min_bound()[0])
 print("Width of the door: ", width)
+height = (aabb.get_max_bound()[2] - aabb.get_min_bound()[2])
+print("Height of the door: ", height)
+length = (aabb.get_max_bound()[1] - aabb.get_min_bound()[1])
+print("Length of the door: ", length)
+center = aabb.get_center()
+
+destination_box = northwall.get_axis_aligned_bounding_box()
+destination_center = destination_box.get_center()
 
 width = 0.2
 possiblePath = 0
@@ -71,7 +81,6 @@ def draw_line(coordinate_list):
     print(coordinate_list)
     for i in range(len(coordinate_list)):
         if i != len(coordinate_list) - 1:
-            print("i: {}".format(i))
             line_set = o3d.geometry.LineSet()
             line_set.points = o3d.utility.Vector3dVector(np.array([coordinate_list[i], coordinate_list[i + 1]]))
             line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
@@ -82,22 +91,25 @@ def check_enough_space(side, wall, objList):
     print("\nTest {}:".format(side))
     print("{} object list length: {}".format(side, len(objList)))
     stop_list.clear()
+    stop_list.append(np.array(center))
     for i in range(len(objList)):
-        distance = objList[i].compute_point_cloud_distance(wall)
-        minDistance = np.min(distance)
-        print("obj{} minDistance in {}: {}".format(i, side, minDistance))
+        print("i in check: {}".format(i))
+        if i == len(objList) - 1:
+            distance = objList[i].compute_point_cloud_distance(northwall)
+            min_distance = np.min(distance)
+        else:
+            distance = objList[i].compute_point_cloud_distance(wall)
+            min_distance = np.min(distance)
+        print("obj{} minDistance in {}: {}".format(i, side, min_distance))
 
-        if minDistance < width:
+        if min_distance < width:
             print("Obj{} not enough width in {}".format(i, side))
             print("{} cannot pass".format(side))
             return 0
         else:
-            # if side == "east":
-            #     east_stop_list.append(return_coordinates(objList[i], distance))
-            # elif side == "west":
-            #     west_stop_list.append(return_coordinates(objList[i], distance))
             stop_list.append(return_coordinates(objList[i], distance))
-    print("{} can pass!!!".format(side))
+    # Add the destination point
+    stop_list.append(destination_center)
     draw_line(stop_list)
     return 1
 
