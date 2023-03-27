@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import open3d as o3d
 
 # load all chair PLYs in the west
@@ -45,8 +45,7 @@ eastSide.append(eastchair3)
 
 
 # Assume the object width is same as the door
-
-# Get the AABB of the point cloud
+# Get the axis_aligned_bounding_box of the point cloud
 aabb = door.get_axis_aligned_bounding_box()
 # Get the width of the AABB
 width = (aabb.get_max_bound()[0] - aabb.get_min_bound()[0]) / 2
@@ -54,31 +53,59 @@ print("Width of the door: ", width)
 
 width = 0.2
 possiblePath = 0
+west_stop_list = []
+east_stop_list = []
+stop_list = []
+objectList = []
 
 
-def checkEnoughSpace(side, wall, objList):
-    canPass = True
+def return_coordinates(obstacle, distance_array):
+    obstacle_np = np.asarray(obstacle.points)
+    closest_index = np.argmin(distance_array, axis=0)
+    closest_coordinates_from_object = obstacle_np[closest_index]
+    return closest_coordinates_from_object
+
+
+def draw_line(coordinate_list):
+    print("coord_list length: {}".format(len(coordinate_list)))
+    print(coordinate_list)
+    for i in range(len(coordinate_list)):
+        if i != len(coordinate_list) - 1:
+            print("i: {}".format(i))
+            line_set = o3d.geometry.LineSet()
+            line_set.points = o3d.utility.Vector3dVector(np.array([coordinate_list[i], coordinate_list[i + 1]]))
+            line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
+            objectList.append(line_set)
+
+
+def check_enough_space(side, wall, objList):
     print("\nTest {}:".format(side))
+    print("{} object list length: {}".format(side, len(objList)))
+    stop_list.clear()
     for i in range(len(objList)):
         distance = objList[i].compute_point_cloud_distance(wall)
-        minDistance = numpy.min(distance)
+        minDistance = np.min(distance)
         print("obj{} minDistance in {}: {}".format(i, side, minDistance))
+
         if minDistance < width:
             print("Obj{} not enough width in {}".format(i, side))
-            canPass = False
             print("{} cannot pass".format(side))
             return 0
-    if canPass:
-        print("{} can pass".format(side))
-        return 1
+        else:
+            # if side == "east":
+            #     east_stop_list.append(return_coordinates(objList[i], distance))
+            # elif side == "west":
+            #     west_stop_list.append(return_coordinates(objList[i], distance))
+            stop_list.append(return_coordinates(objList[i], distance))
+    print("{} can pass!!!".format(side))
+    draw_line(stop_list)
+    return 1
 
 
-possiblePath += checkEnoughSpace("east", eastwall, eastSide)
-possiblePath += checkEnoughSpace("west", westwall, westSide)
+possiblePath += check_enough_space("east", eastwall, eastSide)
+possiblePath += check_enough_space("west", westwall, westSide)
 
 print("\npossible path:", possiblePath)
-
-objectList = []
 
 objectList.append(table)
 objectList.append(door)
