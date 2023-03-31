@@ -1,5 +1,6 @@
 import numpy as np
 import open3d as o3d
+import plyfile
 
 # load all chair PLYs in the west
 westchair1 = o3d.io.read_point_cloud("westchair1.ply")
@@ -61,13 +62,66 @@ center = aabb.get_center()
 destination_box = northwall.get_axis_aligned_bounding_box()
 destination_center = destination_box.get_center()
 
-width = 0.2
+width = 1
 possiblePath = 0
 west_stop_list = []
 east_stop_list = []
 stop_list = []
 objectList = []
 
+left = []
+middle = []
+right = []
+
+def get_section():
+    # Get the 1/3 width from the floor
+
+    floor_box = floor.get_minimal_oriented_bounding_box()
+    floor_width = (floor_box.get_max_bound()[0] - floor_box.get_min_bound()[0])
+    print("\nfloor width: {}".format(floor_width))
+    floor_length = (floor_box.get_max_bound()[1] - floor_box.get_min_bound()[1])
+    print("floor length: {}".format(floor_length))
+    floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
+    print("floor height: {}".format(floor_height))
+    # north_eightpoints = np.asarray(floor_box.get_box_points())
+    # print("floor 8 points: ", north_eightpoints)
+    # objectList.append(floor_box)
+
+
+
+
+
+    # print("table:")
+    # floor_max_x = table.get_max_bound()[0]
+    # floor_min_x = table.get_min_bound()[0]
+    # floor_max_y = table.get_max_bound()[1]
+    # floor_min_y = table.get_min_bound()[1]
+    # floor_max_z = table.get_max_bound()[2]
+    # floor_min_z = table.get_min_bound()[2]
+    # print(floor_max_x)
+    # print(floor_min_x)
+    # print(floor_max_y)
+    # print(floor_min_y)
+    # print(floor_max_z)
+    # print(floor_min_z)
+    #
+    # print("floor")
+    # floor_max_x = floor.get_max_bound()[0]
+    # floor_min_x = floor.get_min_bound()[0]
+    # floor_max_y = floor.get_max_bound()[1]
+    # floor_min_y = floor.get_min_bound()[1]
+    # floor_max_z = floor.get_max_bound()[2]
+    # floor_min_z = floor.get_min_bound()[2]
+    # print(floor_max_x)
+    # print(floor_min_x)
+    # print(floor_max_y)
+    # print(floor_min_y)
+    # print(floor_max_z)
+    # print(floor_min_z)
+
+
+
+get_section()
 
 def return_coordinates(obstacle, distance_array):
     obstacle_np = np.asarray(obstacle.points)
