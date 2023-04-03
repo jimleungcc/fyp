@@ -85,12 +85,32 @@ def get_section():
     print("floor length: {}".format(floor_length))
     floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
     print("floor height: {}".format(floor_height))
-    floorbox_8points = np.asarray(floor_box.get_box_points())
-    print("floor 8 points: ", floorbox_8points)
-    objectList.append(floor_box)
 
-    p2 = o3d.io.read_point_cloud("point2.ply")
-    objectList.append(p2)
+    floorbox_8points = np.asarray(floor_box.get_box_points())
+    np.set_printoptions(suppress=True, precision=15)
+    # print("Before sort", floorbox_8points)
+
+    sorted_idx = np.argsort(floorbox_8points[:, 0])
+    sorted_a = floorbox_8points[sorted_idx]
+    # print("floor 8 points: ", sorted_a)
+    # objectList.append(floor_box)
+
+    # p2 = o3d.io.read_point_cloud("point2.ply")
+    # objectList.append(p2)
+
+    # p3 = o3d.io.read_point_cloud("sortedAllPoint.ply")
+    # objectList.append(p3)
+
+    door_box = door.get_minimal_oriented_bounding_box()
+    door_8points = np.asarray(door_box.get_box_points())
+    # print("door 8 points", door_8points)
+    sorted_idx = np.argsort(door_8points[:, 0])
+    sorted_a = door_8points[sorted_idx]
+    print("sorted door 8 point", sorted_a)
+
+
+    p4 = o3d.io.read_point_cloud("doorallpoint.ply")
+    objectList.append(p4)
 
 
     # get the min x and max x coordinates

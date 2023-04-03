@@ -1,10 +1,6 @@
 import math
 
 # Coordinates of the rectangle's vertices clockwise
-# x1, y1 = 1, 3
-# x2, y2 = 6, 8
-# x3, y3 = 8, 6
-# x4, y4 = 3, 1
 
 x1, y1 = 0.998697831, -14.6237140
 x2, y2 = -0.445642758, -17.4668958
