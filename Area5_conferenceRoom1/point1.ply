@@ -1,6 +1,6 @@
 ply
 format ascii 1.0
-element vertex 1
+element vertex 2
 property double x
 property double y
 property double z
@@ -10,4 +10,5 @@ property uchar blue
 element face 0
 property list uchar int vertex_indices
 end_header
--2.158741 -13.016686 0.787 0 0 0
+1 -11.938908 0.0445 0 0 0
+0 -12 0.0445 255 0 0

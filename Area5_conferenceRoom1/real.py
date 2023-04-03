@@ -1,6 +1,7 @@
 import numpy as np
 import open3d as o3d
-import plyfile
+import open3d.utility
+from plyfile import PlyData, PlyElement
 
 # load all chair PLYs in the west
 westchair1 = o3d.io.read_point_cloud("westchair1.ply")
@@ -52,11 +53,11 @@ eastSide.append(table)
 aabb = door.get_axis_aligned_bounding_box()
 # Get the width of the AABB
 width = (aabb.get_max_bound()[0] - aabb.get_min_bound()[0])
-print("Width of the door: ", width)
+# print("Width of the door: ", width)
 height = (aabb.get_max_bound()[2] - aabb.get_min_bound()[2])
-print("Height of the door: ", height)
+# print("Height of the door: ", height)
 length = (aabb.get_max_bound()[1] - aabb.get_min_bound()[1])
-print("Length of the door: ", length)
+# print("Length of the door: ", length)
 center = aabb.get_center()
 
 destination_box = northwall.get_axis_aligned_bounding_box()
@@ -73,6 +74,7 @@ left = []
 middle = []
 right = []
 
+
 def get_section():
     # Get the 1/3 width from the floor
 
@@ -83,45 +85,71 @@ def get_section():
     print("floor length: {}".format(floor_length))
     floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
     print("floor height: {}".format(floor_height))
-    # north_eightpoints = np.asarray(floor_box.get_box_points())
-    # print("floor 8 points: ", north_eightpoints)
-    # objectList.append(floor_box)
+    floorbox_8points = np.asarray(floor_box.get_box_points())
+    print("floor 8 points: ", floorbox_8points)
+    objectList.append(floor_box)
+
+    p2 = o3d.io.read_point_cloud("point2.ply")
+    objectList.append(p2)
 
 
+    # get the min x and max x coordinates
+    min_x = floor_box.get_min_bound()[0]
+    max_x = floor_box.get_max_bound()[0]
+    print("min x {}".format(min_x))
+    print("max x {}".format(max_x))
+    diff = max_x - min_x
+    third = diff / 3
+    print("diff: {}".format(diff))
+    # print("1/3 of diff: {}".format(third))
+    print("1/3: {}".format(min_x + third))
+    print("2/3: {}".format(min_x + third * 2))
 
+    min_y = floor_box.get_min_bound()[1]
+    max_y = floor_box.get_max_bound()[1]
+    print("\n")
+    print("min y {}".format(min_y))
+    print("max y {}".format(max_y))
+    diff = max_y - min_y
+    third = diff / 3
+    print("diff: {}".format(diff))
+    # print("1/3 of diff: {}".format(third))
+    print("1/3: {}".format(max_y - third))
+    print("2/3: {}".format(max_y - third - third))
 
+    print("\nby me")
+    floor_max_x = floor.get_max_bound()[0]
+    floor_min_x = floor.get_min_bound()[0]
+    floor_max_y = floor.get_max_bound()[1]
+    floor_min_y = floor.get_min_bound()[1]
+    floor_max_z = floor.get_max_bound()[2]
+    floor_min_z = floor.get_min_bound()[2]
+    print(floor_max_x)
+    print(floor_min_x)
+    print(floor_max_y)
+    print(floor_min_y)
+    print(floor_max_z)
+    print(floor_min_z)
 
-    # print("table:")
-    # floor_max_x = table.get_max_bound()[0]
-    # floor_min_x = table.get_min_bound()[0]
-    # floor_max_y = table.get_max_bound()[1]
-    # floor_min_y = table.get_min_bound()[1]
-    # floor_max_z = table.get_max_bound()[2]
-    # floor_min_z = table.get_min_bound()[2]
-    # print(floor_max_x)
-    # print(floor_min_x)
-    # print(floor_max_y)
-    # print(floor_min_y)
-    # print(floor_max_z)
-    # print(floor_min_z)
-    #
-    # print("floor")
-    # floor_max_x = floor.get_max_bound()[0]
-    # floor_min_x = floor.get_min_bound()[0]
-    # floor_max_y = floor.get_max_bound()[1]
-    # floor_min_y = floor.get_min_bound()[1]
-    # floor_max_z = floor.get_max_bound()[2]
-    # floor_min_z = floor.get_min_bound()[2]
-    # print(floor_max_x)
-    # print(floor_min_x)
-    # print(floor_max_y)
-    # print(floor_min_y)
-    # print(floor_max_z)
-    # print(floor_min_z)
+    diff = floor_max_y - floor_min_y
+    floor_third = diff / 3
+    print("diff: {}".format(diff))
+    print("floor_third: {}".format(floor_third))
+    print("my 1/3: {}".format(floor_max_y - floor_third))
+    print("my 2/3: {}".format(floor_max_y - floor_third - floor_third))
 
+    # line_set = o3d.geometry.LineSet()
+    # line_set.points = o3d.utility.Vector3dVector(
+    #     np.array([[-6.455, -15.501, 0.0445], [-0.998, -15.501, 0.0445]]))
+    # line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
+    # objectList.append(line_set)
+
+    # pt = o3d.io.read_point_cloud("point1.ply")
+    # objectList.append(pt)
 
 
 get_section()
+
 
 def return_coordinates(obstacle, distance_array):
     obstacle_np = np.asarray(obstacle.points)
@@ -177,18 +205,25 @@ objectList.append(table)
 objectList.append(door)
 objectList.append(floor)
 
-objectList.append(northwall)
-objectList.append(eastwall)
-objectList.append(southwall)
-objectList.append(westwall)
+# objectList.append(northwall)
+# objectList.append(eastwall)
+# objectList.append(southwall)
+# objectList.append(westwall)
+#
+# objectList.append(westchair1)
+# objectList.append(westchair2)
+# objectList.append(westchair3)
+# objectList.append(westchair4)
 
-objectList.append(westchair1)
-objectList.append(westchair2)
-objectList.append(westchair3)
-objectList.append(westchair4)
-
-objectList.append(eastchair1)
-objectList.append(eastchair2)
+# objectList.append(eastchair1)
+# objectList.append(eastchair2)
 objectList.append(eastchair3)
+
+# points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
+# colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
+# test_pcd = open3d.geometry.PointCloud()
+# test_pcd.points = open3d.utility.Vector3dVector(points)
+# test_pcd.colors = open3d.utility.Vector3dVector(colors)
+# objectList.append(test_pcd)
 
 o3d.visualization.draw_geometries(objectList)
