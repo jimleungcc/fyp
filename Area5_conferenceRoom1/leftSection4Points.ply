@@ -1,0 +1,16 @@
+ply
+format ascii 1.0
+element vertex 4
+property double x
+property double y
+property double z
+property uchar red
+property uchar green
+property uchar blue
+element face 0
+property list uchar int vertex_indices
+end_header
+-0.44564275754414867 -17.466895820957014 0.0445 0 255 0
+0.03580410526995892 -16.519168562706312 0.0445 0 255 0
+-5.974431629318904 -13.465993513891647 0.0445 255 0 0
+-6.455878492133011 -14.41372077214235 0.0445 0 0 0

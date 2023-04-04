@@ -76,6 +76,52 @@ middle = []
 right = []
 
 
+def get_rectangle_area(x1, y1, x2, y2, x3, y3, x4, y4):
+    # Length of the base
+    base_length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+    # Height of the rectangle
+    height = math.sqrt((x3 - x2) ** 2 + (y3 - y2) ** 2)
+
+    # Area of the rectangle
+    area = base_length * height
+
+    print("The area of the rectangle is:", area, "square units.")
+
+    return area
+
+
+def inside_rectangle(point1, point2, point3, point4, px, py, rectangle_area):
+    x1, y1 = point1[0], point1[1]
+    x2, y2 = point2[0], point2[1]
+    x3, y3 = point3[0], point3[1]
+    x4, y4 = point4[0], point4[1]
+
+    # print("x1, y1:", x1, y1)
+    # print("x2, y2:", x2, y2)
+    # print("x3, y3:", x3, y3)
+    # print("x4, y4:", x4, y4)
+    # print("px, py", px, py)
+
+    def triangle_area(px, py, x1, y1, x2, y2):
+        area = 0.5 * abs((x1 * (y2 - py) + x2 * (py - y1) + px * (y1 - y2)))
+        return area
+
+    t1 = triangle_area(px, py, x1, y1, x2, y2)
+    t2 = triangle_area(px, py, x2, y2, x3, y3)
+    t3 = triangle_area(px, py, x3, y3, x4, y4)
+    t4 = triangle_area(px, py, x1, y1, x4, y4)
+    area_sum_of_triangle = t1 + t2 + t3 + t4
+
+    round_rect_area = round(rectangle_area, 5)
+    round_total_triangles_area = round(area_sum_of_triangle, 5)
+
+    if round_rect_area == round_total_triangles_area:
+        return 1
+    else:
+        return 0
+
+
 def find_2_third_coordinates(x1, y1, x2, y2):
     # Define the endpoints of the line segment as tuples
     p1 = (x1, y1)
@@ -125,14 +171,14 @@ def get_section():
 
     sorted_idx = np.argsort(floorbox_8points[:, 0])
     sorted_a = floorbox_8points[sorted_idx]
-    print("floor 8 points: ", sorted_a)
+    print("sorted floor 8 points: ", sorted_a)
     print("\n")
     rect_points = []
     rect_points.append(sorted_a[4])
     rect_points.append(sorted_a[6])
     rect_points.append(sorted_a[2])
     rect_points.append(sorted_a[0])
-    print("sorted[4] x and y", sorted_a[4][0], sorted_a[4][1])
+    print("rect_points", rect_points)
 
     # Get the 1/3 coordinate of the side
     line1_first_third, line1_second_third = find_2_third_coordinates(sorted_a[4][0], sorted_a[4][1], sorted_a[6][0],
@@ -146,18 +192,33 @@ def get_section():
     print("line2 2/3", line2_second_third)
 
     four_dots = o3d.io.read_point_cloud("point1.ply")
-    objectList.append(four_dots)
+    # objectList.append(four_dots)
 
+    # left section
+    rectangle_area = get_rectangle_area(rect_points[0])
 
-get_section()
+    point_from_westchair2 = westchair2.points
+    print("chair vertex length", len(np.asarray(point_from_westchair2)))
+    # print("first x coord of westchair2", point_from_westchair2[0][0])
 
+    left = 0
+    for i in range(len(np.asarray(point_from_westchair2))):
+        current_x = point_from_westchair2[i][0]
+        current_y = point_from_westchair2[i][1]
+        # left += inside_rectangle(rect_points[0],, current_x, current_y, rectangle_area)
+
+        print("vertex number in left", left)
+
+        leftsection4points = o3d.io.read_point_cloud("leftSection4Points.ply")
+        objectList.append(leftsection4points)
+
+    get_section()
 
 def return_coordinates(obstacle, distance_array):
     obstacle_np = np.asarray(obstacle.points)
     closest_index = np.argmin(distance_array, axis=0)
     closest_coordinates_from_object = obstacle_np[closest_index]
     return closest_coordinates_from_object
-
 
 def draw_line(coordinate_list):
     print("coord_list length: {}".format(len(coordinate_list)))
@@ -168,7 +229,6 @@ def draw_line(coordinate_list):
             line_set.points = o3d.utility.Vector3dVector(np.array([coordinate_list[i], coordinate_list[i + 1]]))
             line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
             objectList.append(line_set)
-
 
 def check_enough_space(side, wall, objList):
     print("\nTest {}:".format(side))
@@ -207,25 +267,25 @@ objectList.append(door)
 objectList.append(floor)
 
 # objectList.append(northwall)
-# objectList.append(eastwall)
-# objectList.append(southwall)
-# objectList.append(westwall)
-#
-# objectList.append(westchair1)
-# objectList.append(westchair2)
-# objectList.append(westchair3)
-# objectList.append(westchair4)
+objectList.append(eastwall)
+objectList.append(southwall)
+objectList.append(westwall)
 
-# objectList.append(eastchair1)
-# objectList.append(eastchair2)
+objectList.append(westchair1)
+objectList.append(westchair2)
+objectList.append(westchair3)
+objectList.append(westchair4)
+
+objectList.append(eastchair1)
+objectList.append(eastchair2)
 objectList.append(eastchair3)
 
 # The coordinate system
-# points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
-# colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
-# test_pcd = open3d.geometry.PointCloud()
-# test_pcd.points = open3d.utility.Vector3dVector(points)
-# test_pcd.colors = open3d.utility.Vector3dVector(colors)
-# objectList.append(test_pcd)
+points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
+colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
+test_pcd = open3d.geometry.PointCloud()
+test_pcd.points = open3d.utility.Vector3dVector(points)
+test_pcd.colors = open3d.utility.Vector3dVector(colors)
+objectList.append(test_pcd)
 
 o3d.visualization.draw_geometries(objectList)
