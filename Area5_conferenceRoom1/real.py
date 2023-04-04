@@ -1,6 +1,7 @@
 import numpy as np
 import open3d as o3d
 import open3d.utility
+import math
 from plyfile import PlyData, PlyElement
 
 # load all chair PLYs in the west
@@ -75,6 +76,39 @@ middle = []
 right = []
 
 
+def find_2_third_coordinates(x1, y1, x2, y2):
+    # Define the endpoints of the line segment as tuples
+    p1 = (x1, y1)
+    p2 = (x2, y2)
+
+    # Calculate the length of the line segment
+    d = math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
+    # Calculate the distance from the first point to the first 1/3 point
+    d_1_3 = (1 / 3) * d
+
+    # Calculate the slope of the line segment
+    m = (p2[1] - p1[1]) / (p2[0] - p1[0])
+
+    # Calculate the x-coordinate of the first 1/3 point
+    x_1_3_1 = p1[0] + d_1_3 / math.sqrt(1 + m ** 2)
+
+    # Calculate the y-coordinate of the first 1/3 point
+    y_1_3_1 = p1[1] + m * (d_1_3 / math.sqrt(1 + m ** 2))
+
+    # Calculate the distance from the first point to the second 1/3 point
+    d_2_3 = (2 / 3) * d
+
+    # Calculate the x-coordinate of the second 1/3 point
+    x_1_3_2 = p1[0] + d_2_3 / math.sqrt(1 + m ** 2)
+
+    # Calculate the y-coordinate of the second 1/3 point
+    y_1_3_2 = p1[1] + m * (d_2_3 / math.sqrt(1 + m ** 2))
+
+    # Return the coordinates of both 1/3 points as a tuple
+    return ((x_1_3_1, y_1_3_1), (x_1_3_2, y_1_3_2))
+
+
 def get_section():
     # Get the 1/3 width from the floor
 
@@ -88,84 +122,31 @@ def get_section():
 
     floorbox_8points = np.asarray(floor_box.get_box_points())
     np.set_printoptions(suppress=True, precision=15)
-    # print("Before sort", floorbox_8points)
 
     sorted_idx = np.argsort(floorbox_8points[:, 0])
     sorted_a = floorbox_8points[sorted_idx]
-    # print("floor 8 points: ", sorted_a)
-    # objectList.append(floor_box)
-
-    # p2 = o3d.io.read_point_cloud("point2.ply")
-    # objectList.append(p2)
-
-    # p3 = o3d.io.read_point_cloud("sortedAllPoint.ply")
-    # objectList.append(p3)
-
-    door_box = door.get_minimal_oriented_bounding_box()
-    door_8points = np.asarray(door_box.get_box_points())
-    # print("door 8 points", door_8points)
-    sorted_idx = np.argsort(door_8points[:, 0])
-    sorted_a = door_8points[sorted_idx]
-    print("sorted door 8 point", sorted_a)
-
-
-    p4 = o3d.io.read_point_cloud("doorallpoint.ply")
-    objectList.append(p4)
-
-
-    # get the min x and max x coordinates
-    min_x = floor_box.get_min_bound()[0]
-    max_x = floor_box.get_max_bound()[0]
-    print("min x {}".format(min_x))
-    print("max x {}".format(max_x))
-    diff = max_x - min_x
-    third = diff / 3
-    print("diff: {}".format(diff))
-    # print("1/3 of diff: {}".format(third))
-    print("1/3: {}".format(min_x + third))
-    print("2/3: {}".format(min_x + third * 2))
-
-    min_y = floor_box.get_min_bound()[1]
-    max_y = floor_box.get_max_bound()[1]
+    print("floor 8 points: ", sorted_a)
     print("\n")
-    print("min y {}".format(min_y))
-    print("max y {}".format(max_y))
-    diff = max_y - min_y
-    third = diff / 3
-    print("diff: {}".format(diff))
-    # print("1/3 of diff: {}".format(third))
-    print("1/3: {}".format(max_y - third))
-    print("2/3: {}".format(max_y - third - third))
+    rect_points = []
+    rect_points.append(sorted_a[4])
+    rect_points.append(sorted_a[6])
+    rect_points.append(sorted_a[2])
+    rect_points.append(sorted_a[0])
+    print("sorted[4] x and y", sorted_a[4][0], sorted_a[4][1])
 
-    print("\nby me")
-    floor_max_x = floor.get_max_bound()[0]
-    floor_min_x = floor.get_min_bound()[0]
-    floor_max_y = floor.get_max_bound()[1]
-    floor_min_y = floor.get_min_bound()[1]
-    floor_max_z = floor.get_max_bound()[2]
-    floor_min_z = floor.get_min_bound()[2]
-    print(floor_max_x)
-    print(floor_min_x)
-    print(floor_max_y)
-    print(floor_min_y)
-    print(floor_max_z)
-    print(floor_min_z)
+    # Get the 1/3 coordinate of the side
+    line1_first_third, line1_second_third = find_2_third_coordinates(sorted_a[4][0], sorted_a[4][1], sorted_a[6][0],
+                                                                     sorted_a[6][1])
+    print("line1 1/3", line1_first_third)
+    print("line1 2/3", line1_second_third)
 
-    diff = floor_max_y - floor_min_y
-    floor_third = diff / 3
-    print("diff: {}".format(diff))
-    print("floor_third: {}".format(floor_third))
-    print("my 1/3: {}".format(floor_max_y - floor_third))
-    print("my 2/3: {}".format(floor_max_y - floor_third - floor_third))
+    line2_first_third, line2_second_third = find_2_third_coordinates(sorted_a[0][0], sorted_a[0][1], sorted_a[2][0],
+                                                                     sorted_a[2][1])
+    print("line2 1/3", line2_first_third)
+    print("line2 2/3", line2_second_third)
 
-    # line_set = o3d.geometry.LineSet()
-    # line_set.points = o3d.utility.Vector3dVector(
-    #     np.array([[-6.455, -15.501, 0.0445], [-0.998, -15.501, 0.0445]]))
-    # line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
-    # objectList.append(line_set)
-
-    # pt = o3d.io.read_point_cloud("point1.ply")
-    # objectList.append(pt)
+    four_dots = o3d.io.read_point_cloud("point1.ply")
+    objectList.append(four_dots)
 
 
 get_section()
@@ -239,6 +220,7 @@ objectList.append(floor)
 # objectList.append(eastchair2)
 objectList.append(eastchair3)
 
+# The coordinate system
 # points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
 # colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
 # test_pcd = open3d.geometry.PointCloud()
