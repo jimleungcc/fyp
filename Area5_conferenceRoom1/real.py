@@ -160,11 +160,11 @@ def get_section():
 
     floor_box = floor.get_minimal_oriented_bounding_box()
     floor_width = (floor_box.get_max_bound()[0] - floor_box.get_min_bound()[0])
-    print("\nfloor width: {}".format(floor_width))
+    # print("\nfloor width: {}".format(floor_width))
     floor_length = (floor_box.get_max_bound()[1] - floor_box.get_min_bound()[1])
-    print("floor length: {}".format(floor_length))
+    # print("floor length: {}".format(floor_length))
     floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
-    print("floor height: {}".format(floor_height))
+    # print("floor height: {}".format(floor_height))
 
     floorbox_8points = np.asarray(floor_box.get_box_points())
     np.set_printoptions(suppress=True, precision=15)
@@ -181,9 +181,6 @@ def get_section():
     # 7 > 5 > 1 > 3
     print("rect_points\n", rect_points)
 
-    floor4points = o3d.io.read_point_cloud("correct_floor4point.ply")
-    # objectList.append(floor4points)
-
     # Get the 1/3 coordinate of the side
     line1_first_third, line1_second_third = find_2_third_coordinates(rect_points[1][0], rect_points[1][1],
                                                                      rect_points[0][0], rect_points[0][1])
@@ -194,11 +191,6 @@ def get_section():
                                                                      rect_points[3][0], rect_points[3][1])
     print("\nline2 1/3", line2_first_third)
     print("line2 2/3", line2_second_third)
-
-    line1_pcd = o3d.io.read_point_cloud("line1.ply")
-    line2_pcd = o3d.io.read_point_cloud("line2.ply")
-    # objectList.append(line1_pcd)
-    # objectList.append(line2_pcd)
 
     # left section
     left_rectangle_area = get_rectangle_area(rect_points[0][0], rect_points[0][1],
@@ -226,12 +218,6 @@ def get_section():
                                          current_x, current_y, left_rectangle_area)
 
     print("vertex number in left", left_section)
-
-    leftsection4points = o3d.io.read_point_cloud("leftSection4Points.ply")
-    objectList.append(leftsection4points)
-
-    floor8points = o3d.io.read_point_cloud("floor8point.ply")
-    # objectList.append(floor8points)
 
 
 get_section()
@@ -280,6 +266,7 @@ def check_enough_space(side, wall, objList):
     stop_list.append(destination_center)
     draw_line(stop_list)
     return 1
+
 
 #
 # possiblePath += check_enough_space("east", eastwall, eastSide)
