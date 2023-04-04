@@ -9,8 +9,8 @@ def triangle_area(px, py, x1, y1, x2, y2):
 
 
 x1, y1 = -0.445642757544149, -17.466895820957014
-x2, y2 = 0.03580410526995892, -16.519168562706312
-x3, y3 = -5.974431629318904, -13.465993513891647
+x2, y2 = 0.5172509680840665, -15.571441304455607
+x3, y3 = -5.492984766504796, -12.518266255640945
 x4, y4 = -6.455878492133011, -14.41372077214235
 
 # Length of the base
@@ -26,7 +26,7 @@ area = base_length * height
 print("The area of the rectangle is:", area, "square units.")
 
 # Coordinates of the triangle's vertices
-px, py = -1.877909, -13.668191
+px, py = -2.069382, -13.911818
 
 t1 = triangle_area(px, py, x1, y1, x2, y2)
 t2 = triangle_area(px, py, x2, y2, x3, y3)

@@ -174,51 +174,75 @@ def get_section():
     print("sorted floor 8 points: ", sorted_a)
     print("\n")
     rect_points = []
-    rect_points.append(sorted_a[4])
     rect_points.append(sorted_a[6])
-    rect_points.append(sorted_a[2])
+    rect_points.append(sorted_a[4])
     rect_points.append(sorted_a[0])
-    print("rect_points", rect_points)
+    rect_points.append(sorted_a[2])
+    # 7 > 5 > 1 > 3
+    print("rect_points\n", rect_points)
+
+    floor4points = o3d.io.read_point_cloud("correct_floor4point.ply")
+    # objectList.append(floor4points)
 
     # Get the 1/3 coordinate of the side
-    line1_first_third, line1_second_third = find_2_third_coordinates(sorted_a[4][0], sorted_a[4][1], sorted_a[6][0],
-                                                                     sorted_a[6][1])
+    line1_first_third, line1_second_third = find_2_third_coordinates(rect_points[1][0], rect_points[1][1],
+                                                                     rect_points[0][0], rect_points[0][1])
     print("line1 1/3", line1_first_third)
     print("line1 2/3", line1_second_third)
 
-    line2_first_third, line2_second_third = find_2_third_coordinates(sorted_a[0][0], sorted_a[0][1], sorted_a[2][0],
-                                                                     sorted_a[2][1])
-    print("line2 1/3", line2_first_third)
+    line2_first_third, line2_second_third = find_2_third_coordinates(rect_points[2][0], rect_points[2][1],
+                                                                     rect_points[3][0], rect_points[3][1])
+    print("\nline2 1/3", line2_first_third)
     print("line2 2/3", line2_second_third)
 
-    four_dots = o3d.io.read_point_cloud("point1.ply")
-    # objectList.append(four_dots)
+    line1_pcd = o3d.io.read_point_cloud("line1.ply")
+    line2_pcd = o3d.io.read_point_cloud("line2.ply")
+    # objectList.append(line1_pcd)
+    # objectList.append(line2_pcd)
 
     # left section
-    rectangle_area = get_rectangle_area(rect_points[0])
+    left_rectangle_area = get_rectangle_area(rect_points[0][0], rect_points[0][1],
+                                             line1_second_third[0], line1_second_third[1],
+                                             line2_second_third[0], line2_second_third[1],
+                                             rect_points[3][0], rect_points[3][1])
+    print("left rectangle area", left_rectangle_area)
 
     point_from_westchair2 = westchair2.points
     print("chair vertex length", len(np.asarray(point_from_westchair2)))
-    # print("first x coord of westchair2", point_from_westchair2[0][0])
 
-    left = 0
+    print("\n")
+    print(rect_points[0])
+    print(line1_second_third)
+    print(line2_second_third)
+    print(rect_points[3])
+    print(point_from_westchair2[0][0])
+    print(point_from_westchair2[0][1])
+
+    left_section = 0
     for i in range(len(np.asarray(point_from_westchair2))):
         current_x = point_from_westchair2[i][0]
         current_y = point_from_westchair2[i][1]
-        # left += inside_rectangle(rect_points[0],, current_x, current_y, rectangle_area)
+        left_section += inside_rectangle(rect_points[0], line1_second_third, line2_second_third, rect_points[3],
+                                         current_x, current_y, left_rectangle_area)
 
-        print("vertex number in left", left)
+    print("vertex number in left", left_section)
 
-        leftsection4points = o3d.io.read_point_cloud("leftSection4Points.ply")
-        objectList.append(leftsection4points)
+    leftsection4points = o3d.io.read_point_cloud("leftSection4Points.ply")
+    objectList.append(leftsection4points)
 
-    get_section()
+    floor8points = o3d.io.read_point_cloud("floor8point.ply")
+    # objectList.append(floor8points)
+
+
+get_section()
+
 
 def return_coordinates(obstacle, distance_array):
     obstacle_np = np.asarray(obstacle.points)
     closest_index = np.argmin(distance_array, axis=0)
     closest_coordinates_from_object = obstacle_np[closest_index]
     return closest_coordinates_from_object
+
 
 def draw_line(coordinate_list):
     print("coord_list length: {}".format(len(coordinate_list)))
@@ -229,6 +253,7 @@ def draw_line(coordinate_list):
             line_set.points = o3d.utility.Vector3dVector(np.array([coordinate_list[i], coordinate_list[i + 1]]))
             line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
             objectList.append(line_set)
+
 
 def check_enough_space(side, wall, objList):
     print("\nTest {}:".format(side))
@@ -256,11 +281,11 @@ def check_enough_space(side, wall, objList):
     draw_line(stop_list)
     return 1
 
-
-possiblePath += check_enough_space("east", eastwall, eastSide)
-possiblePath += check_enough_space("west", westwall, westSide)
-
-print("\npossible path:", possiblePath)
+#
+# possiblePath += check_enough_space("east", eastwall, eastSide)
+# possiblePath += check_enough_space("west", westwall, westSide)
+#
+# print("\npossible path:", possiblePath)
 
 objectList.append(table)
 objectList.append(door)
