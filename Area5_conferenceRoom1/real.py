@@ -26,28 +26,15 @@ eastwall = o3d.io.read_point_cloud("eastwall_combine.ply")
 southwall = o3d.io.read_point_cloud("southwall.ply")
 westwall = o3d.io.read_point_cloud("westwall_combine.ply")
 
-# distances = westwall.compute_point_cloud_distance(westchair1)
-# distance = sum(distances)/len(distances)
-# print("Distance between the two point clouds:", distance)
-
-westSide = []
-westSide.append(westchair1)
-westSide.append(westchair2)
-westSide.append(westchair3)
-westSide.append(westchair4)
-westSide.append(table)
-
-eastSide = []
-eastSide.append(eastchair1)
-eastSide.append(eastchair2)
-eastSide.append(eastchair3)
-eastSide.append(table)
-
-# dist = westchair1.compute_point_cloud_distance(westwall)
-# print("numpy min:", numpy.min(dist))
-# print("numpy max:", numpy.max(dist))
-# print("numpy avg:", numpy.mean(dist))
-
+object_list = []
+object_list.append(table)
+object_list.append(westchair1)
+object_list.append(westchair2)
+object_list.append(westchair3)
+object_list.append(westchair4)
+object_list.append(eastchair1)
+object_list.append(eastchair2)
+object_list.append(eastchair3)
 
 # Assume the object width is same as the door
 # Get the axis_aligned_bounding_box of the point cloud
@@ -69,11 +56,11 @@ possiblePath = 0
 west_stop_list = []
 east_stop_list = []
 stop_list = []
-objectList = []
+display_list = []
 
-left = []
-middle = []
-right = []
+left_obj_list = []
+middle_obj_list = []
+right_obj_list = []
 
 
 def get_rectangle_area(point1, point2, point3, point4):
@@ -164,12 +151,9 @@ def get_section():
     # Get the 1/3 width from the floor
 
     floor_box = floor.get_minimal_oriented_bounding_box()
-    floor_width = (floor_box.get_max_bound()[0] - floor_box.get_min_bound()[0])
-    # print("\nfloor width: {}".format(floor_width))
-    floor_length = (floor_box.get_max_bound()[1] - floor_box.get_min_bound()[1])
-    # print("floor length: {}".format(floor_length))
-    floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
-    # print("floor height: {}".format(floor_height))
+    # floor_width = (floor_box.get_max_bound()[0] - floor_box.get_min_bound()[0])
+    # floor_length = (floor_box.get_max_bound()[1] - floor_box.get_min_bound()[1])
+    # floor_height = (floor_box.get_max_bound()[2] - floor_box.get_min_bound()[2])
 
     floorbox_8points = np.asarray(floor_box.get_box_points())
     np.set_printoptions(suppress=True, precision=15)
@@ -189,7 +173,7 @@ def get_section():
     # Get the 1/3 coordinate of the side
     line1_first_third, line1_second_third = find_2_third_coordinates(rect_points[1][0], rect_points[1][1],
                                                                      rect_points[0][0], rect_points[0][1])
-    print("line1 1/3", line1_first_third)
+    print("\nline1 1/3", line1_first_third)
     print("line1 2/3", line1_second_third)
 
     line2_first_third, line2_second_third = find_2_third_coordinates(rect_points[2][0], rect_points[2][1],
@@ -198,14 +182,10 @@ def get_section():
     print("line2 2/3", line2_second_third)
 
     correct4points = o3d.io.read_point_cloud("./reference_plys/correct_floor4point.ply")
-    objectList.append(correct4points)
+    display_list.append(correct4points)
 
     # left section
     left_rectangle_area = get_rectangle_area(rect_points[0], line1_second_third, line2_second_third, rect_points[3])
-    # left_rectangle_area = get_rectangle_area(rect_points[0][0], rect_points[0][1],
-    #                                          line1_second_third[0], line1_second_third[1],
-    #                                          line2_second_third[0], line2_second_third[1],
-    #                                          rect_points[3][0], rect_points[3][1])
     print("left rectangle area", left_rectangle_area)
 
     middle_rectangle_area = get_rectangle_area(line1_second_third, line1_first_third,
@@ -226,30 +206,41 @@ def get_section():
     # print(point_from_westchair2[0][0])
     # print(point_from_westchair2[0][1])
 
-    left_section = 0
-    left_percentage = 0
-    middle_section = 0
-    middle_percentage = 0
-    right_section = 0
-    right_percentage = 0
-    for i in range(len(np.asarray(point_from_westchair2))):
-        current_x = point_from_westchair2[i][0]
-        current_y = point_from_westchair2[i][1]
-        left_section += inside_rectangle(rect_points[0], line1_second_third, line2_second_third, rect_points[3],
-                                         current_x, current_y, left_rectangle_area)
-        middle_section += inside_rectangle(line1_second_third, line1_first_third, line2_first_third, line2_second_third,
-                                           current_x, current_y, middle_rectangle_area)
-        right_section += inside_rectangle(line1_first_third, rect_points[1], rect_points[2], line2_first_third,
-                                          current_x, current_y, right_rectangle_area)
+    for obj in object_list:
+        left_section = 0
+        left_percentage = 0
+        middle_section = 0
+        middle_percentage = 0
+        right_section = 0
+        right_percentage = 0
+        point_from_object = obj.points
+        object_vertex_length = len(np.asarray(point_from_object))
+        for i in range(object_vertex_length):
+            current_x = point_from_object[i][0]
+            current_y = point_from_object[i][1]
+            left_section += inside_rectangle(rect_points[0], line1_second_third, line2_second_third, rect_points[3],
+                                             current_x, current_y, left_rectangle_area)
+            middle_section += inside_rectangle(line1_second_third, line1_first_third,
+                                               line2_first_third, line2_second_third,
+                                               current_x, current_y, middle_rectangle_area)
+            right_section += inside_rectangle(line1_first_third, rect_points[1], rect_points[2], line2_first_third,
+                                              current_x, current_y, right_rectangle_area)
 
-    object_vertex_length = len(np.asarray(point_from_westchair2))
-    left_percentage = left_section / object_vertex_length * 100
-    print("left %:", left_percentage)
-    middle_percentage = middle_section / object_vertex_length * 100
-    print("Middle %:", middle_percentage)
-    right_percentage = right_section / object_vertex_length * 100
-    print("Right %:", right_percentage)
-
+        left_percentage = left_section / object_vertex_length * 100
+        print("\nleft %:", left_percentage)
+        middle_percentage = middle_section / object_vertex_length * 100
+        print("Middle %:", middle_percentage)
+        right_percentage = right_section / object_vertex_length * 100
+        print("Right %:", right_percentage)
+        if left_percentage > 50:
+            print("Left")
+            left_obj_list.append(obj)
+        if middle_percentage > 50:
+            print("Middle")
+            middle_obj_list.append(obj)
+        if right_percentage > 50:
+            print("Right")
+            right_obj_list.append(obj)
 
 
 get_section()
@@ -270,7 +261,7 @@ def draw_line(coordinate_list):
             line_set = o3d.geometry.LineSet()
             line_set.points = o3d.utility.Vector3dVector(np.array([coordinate_list[i], coordinate_list[i + 1]]))
             line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
-            objectList.append(line_set)
+            display_list.append(line_set)
 
 
 def check_enough_space(side, wall, objList):
@@ -306,23 +297,13 @@ def check_enough_space(side, wall, objList):
 #
 # print("\npossible path:", possiblePath)
 
-objectList.append(table)
-objectList.append(door)
-objectList.append(floor)
+display_list.append(door)
+display_list.append(floor)
 
-# objectList.append(northwall)
-objectList.append(eastwall)
-objectList.append(southwall)
-objectList.append(westwall)
-
-objectList.append(westchair1)
-objectList.append(westchair2)
-objectList.append(westchair3)
-objectList.append(westchair4)
-
-objectList.append(eastchair1)
-objectList.append(eastchair2)
-objectList.append(eastchair3)
+display_list.append(northwall)
+display_list.append(eastwall)
+display_list.append(southwall)
+display_list.append(westwall)
 
 # The coordinate system
 points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
@@ -330,6 +311,10 @@ colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
 test_pcd = open3d.geometry.PointCloud()
 test_pcd.points = open3d.utility.Vector3dVector(points)
 test_pcd.colors = open3d.utility.Vector3dVector(colors)
-objectList.append(test_pcd)
+display_list.append(test_pcd)
+#
+# display_list.append(left_obj_list)
+# display_list.append(middle_obj_list)
+# display_list.append(right_obj_list)
 
-o3d.visualization.draw_geometries(objectList)
+o3d.visualization.draw_geometries(display_list)

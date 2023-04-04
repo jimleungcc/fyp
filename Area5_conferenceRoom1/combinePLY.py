@@ -1,3 +1,17 @@
+westSide = []
+westSide.append(westchair1)
+westSide.append(westchair2)
+westSide.append(westchair3)
+westSide.append(westchair4)
+westSide.append(table)
+
+eastSide = []
+eastSide.append(eastchair1)
+eastSide.append(eastchair2)
+eastSide.append(eastchair3)
+eastSide.append(table)
+
+
 # Get the input file names from the user
 input_file1 = input("Enter the name of the first PLY file: ")
 input_file2 = input("Enter the name of the second PLY file: ")
