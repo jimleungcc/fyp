@@ -76,8 +76,13 @@ middle = []
 right = []
 
 
-def get_rectangle_area(x1, y1, x2, y2, x3, y3, x4, y4):
+def get_rectangle_area(point1, point2, point3, point4):
     # Length of the base
+    x1, y1 = point1[0], point1[1]
+    x2, y2 = point2[0], point2[1]
+    x3, y3 = point3[0], point3[1]
+    x4, y4 = point4[0], point4[1]
+
     base_length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # Height of the rectangle
@@ -171,8 +176,8 @@ def get_section():
 
     sorted_idx = np.argsort(floorbox_8points[:, 0])
     sorted_a = floorbox_8points[sorted_idx]
-    print("sorted floor 8 points: ", sorted_a)
-    print("\n")
+    # print("sorted floor 8 points: ", sorted_a)
+    # print("\n")
     rect_points = []
     rect_points.append(sorted_a[6])
     rect_points.append(sorted_a[4])
@@ -192,32 +197,59 @@ def get_section():
     print("\nline2 1/3", line2_first_third)
     print("line2 2/3", line2_second_third)
 
+    correct4points = o3d.io.read_point_cloud("./reference_plys/correct_floor4point.ply")
+    objectList.append(correct4points)
+
     # left section
-    left_rectangle_area = get_rectangle_area(rect_points[0][0], rect_points[0][1],
-                                             line1_second_third[0], line1_second_third[1],
-                                             line2_second_third[0], line2_second_third[1],
-                                             rect_points[3][0], rect_points[3][1])
+    left_rectangle_area = get_rectangle_area(rect_points[0], line1_second_third, line2_second_third, rect_points[3])
+    # left_rectangle_area = get_rectangle_area(rect_points[0][0], rect_points[0][1],
+    #                                          line1_second_third[0], line1_second_third[1],
+    #                                          line2_second_third[0], line2_second_third[1],
+    #                                          rect_points[3][0], rect_points[3][1])
     print("left rectangle area", left_rectangle_area)
 
-    point_from_westchair2 = westchair2.points
+    middle_rectangle_area = get_rectangle_area(line1_second_third, line1_first_third,
+                                               line2_first_third, line2_second_third)
+    print("middle rectangle area", middle_rectangle_area)
+
+    right_rectangle_area = get_rectangle_area(line1_first_third, rect_points[1], rect_points[2], line2_first_third)
+    print("right rectangle area", right_rectangle_area)
+
+    point_from_westchair2 = eastchair3.points
     print("chair vertex length", len(np.asarray(point_from_westchair2)))
 
-    print("\n")
-    print(rect_points[0])
-    print(line1_second_third)
-    print(line2_second_third)
-    print(rect_points[3])
-    print(point_from_westchair2[0][0])
-    print(point_from_westchair2[0][1])
+    # print("\n")
+    # print(rect_points[0])
+    # print(line1_second_third)
+    # print(line2_second_third)
+    # print(rect_points[3])
+    # print(point_from_westchair2[0][0])
+    # print(point_from_westchair2[0][1])
 
     left_section = 0
+    left_percentage = 0
+    middle_section = 0
+    middle_percentage = 0
+    right_section = 0
+    right_percentage = 0
     for i in range(len(np.asarray(point_from_westchair2))):
         current_x = point_from_westchair2[i][0]
         current_y = point_from_westchair2[i][1]
         left_section += inside_rectangle(rect_points[0], line1_second_third, line2_second_third, rect_points[3],
                                          current_x, current_y, left_rectangle_area)
+        middle_section += inside_rectangle(line1_second_third, line1_first_third, line2_first_third, line2_second_third,
+                                           current_x, current_y, middle_rectangle_area)
+        right_section += inside_rectangle(line1_first_third, rect_points[1], rect_points[2], line2_first_third,
+                                          current_x, current_y, right_rectangle_area)
 
-    print("vertex number in left", left_section)
+    object_vertex_length = len(np.asarray(point_from_westchair2))
+    left_percentage = left_section / object_vertex_length * 100
+    print("left %:", left_percentage)
+    middle_percentage = middle_section / object_vertex_length * 100
+    print("Middle %:", middle_percentage)
+    right_percentage = right_section / object_vertex_length * 100
+    print("Right %:", right_percentage)
+
 
 
 get_section()
