@@ -27,14 +27,14 @@ southwall = o3d.io.read_point_cloud("southwall.ply")
 westwall = o3d.io.read_point_cloud("westwall_combine.ply")
 
 object_list = []
-object_list.append(table)
-object_list.append(westchair1)
-object_list.append(westchair2)
-object_list.append(westchair3)
-object_list.append(westchair4)
-object_list.append(eastchair1)
-object_list.append(eastchair2)
-object_list.append(eastchair3)
+object_list.append([table, "table"])
+object_list.append([westchair1, "westchair1"])
+object_list.append([eastchair1, "eastchair1"])
+object_list.append([westchair2, "westchair2"])
+object_list.append([eastchair2, "eastchair2"])
+object_list.append([westchair3, "westchair3"])
+object_list.append([eastchair3, "eastchair3"])
+object_list.append([westchair4, "westchair4"])
 
 # Assume the object width is same as the door
 # Get the axis_aligned_bounding_box of the point cloud
@@ -47,6 +47,7 @@ height = (aabb.get_max_bound()[2] - aabb.get_min_bound()[2])
 length = (aabb.get_max_bound()[1] - aabb.get_min_bound()[1])
 # print("Length of the door: ", length)
 center = aabb.get_center()
+print("start center coord:", center)
 
 destination_box = northwall.get_axis_aligned_bounding_box()
 destination_center = destination_box.get_center()
@@ -213,7 +214,7 @@ def get_section():
         middle_percentage = 0
         right_section = 0
         right_percentage = 0
-        point_from_object = obj.points
+        point_from_object = obj[0].points
         object_vertex_length = len(np.asarray(point_from_object))
         for i in range(object_vertex_length):
             current_x = point_from_object[i][0]
@@ -233,17 +234,44 @@ def get_section():
         right_percentage = right_section / object_vertex_length * 100
         print("Right %:", right_percentage)
         if left_percentage > 50:
-            print("Left")
+            print("{} in Left".format(obj[1]))
             left_obj_list.append(obj)
         if middle_percentage > 50:
-            print("Middle")
+            print("{} in Middle".format(obj[1]))
             middle_obj_list.append(obj)
         if right_percentage > 50:
-            print("Right")
+            print("{} in Right".format(obj[1]))
             right_obj_list.append(obj)
 
 
-get_section()
+def sort_object_list(obj_list, startpoint_object):
+    n = len(obj_list)
+    swapped = False
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            distance_j1 = startpoint_object.compute_point_cloud_distance(obj_list[j][0])
+            distance_j2 = startpoint_object.compute_point_cloud_distance(obj_list[j + 1][0])
+
+            min_distance_j1 = np.min(distance_j1)
+            min_distance_j2 = np.min(distance_j2)
+
+            # print("j min distance:", min_distance_j1)
+            # print("j+1 min distance:", min_distance_j2)
+
+            if min_distance_j1 > min_distance_j2:
+                swapped = True
+                obj_list[j], obj_list[j + 1] = obj_list[j + 1], obj_list[j]
+
+        if not swapped:
+            return
+
+
+def print_sorted_object_list(sorted_list):
+    for obj in sorted_list:
+        print(obj[1])
+
+
+
 
 
 def return_coordinates(obstacle, distance_array):
@@ -291,6 +319,22 @@ def check_enough_space(side, wall, objList):
     return 1
 
 
+def append_display_list(list):
+    for obj in list:
+        display_list.append(obj[0])
+
+
+get_section()
+sort_object_list(left_obj_list, door)
+sort_object_list(middle_obj_list, door)
+sort_object_list(right_obj_list, door)
+print("sorted left:")
+print_sorted_object_list(left_obj_list)
+print("sorted middle:")
+print_sorted_object_list(middle_obj_list)
+print("sorted right:")
+print_sorted_object_list(right_obj_list)
+
 #
 # possiblePath += check_enough_space("east", eastwall, eastSide)
 # possiblePath += check_enough_space("west", westwall, westSide)
@@ -312,9 +356,10 @@ test_pcd = open3d.geometry.PointCloud()
 test_pcd.points = open3d.utility.Vector3dVector(points)
 test_pcd.colors = open3d.utility.Vector3dVector(colors)
 display_list.append(test_pcd)
-#
-# display_list.append(left_obj_list)
-# display_list.append(middle_obj_list)
-# display_list.append(right_obj_list)
+
+
+append_display_list(left_obj_list)
+append_display_list(middle_obj_list)
+append_display_list(right_obj_list)
 
 o3d.visualization.draw_geometries(display_list)
