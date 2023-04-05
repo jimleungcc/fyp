@@ -52,7 +52,9 @@ print("start center coord:", center)
 destination_box = northwall.get_axis_aligned_bounding_box()
 destination_center = destination_box.get_center()
 
-width = 1
+width = width / 2  # half width of the door
+print("door width/2:", width)  # 0.4681645000000003
+width = 0.3
 possiblePath = 0
 west_stop_list = []
 east_stop_list = []
@@ -196,9 +198,6 @@ def get_section():
     right_rectangle_area = get_rectangle_area(line1_first_third, rect_points[1], rect_points[2], line2_first_third)
     print("right rectangle area", right_rectangle_area)
 
-    point_from_westchair2 = eastchair3.points
-    print("chair vertex length", len(np.asarray(point_from_westchair2)))
-
     # print("\n")
     # print(rect_points[0])
     # print(line1_second_third)
@@ -271,9 +270,6 @@ def print_sorted_object_list(sorted_list):
         print(obj[1])
 
 
-
-
-
 def return_coordinates(obstacle, distance_array):
     obstacle_np = np.asarray(obstacle.points)
     closest_index = np.argmin(distance_array, axis=0)
@@ -292,31 +288,66 @@ def draw_line(coordinate_list):
             display_list.append(line_set)
 
 
-def check_enough_space(side, wall, objList):
+def check_enough_space(side, wall, obj_list):
     print("\nTest {}:".format(side))
-    print("{} object list length: {}".format(side, len(objList)))
+    print("{} object list length: {}".format(side, len(obj_list)))
     stop_list.clear()
     stop_list.append(np.array(center))
-    for i in range(len(objList)):
-        print("i in check: {}".format(i))
-        if i == len(objList) - 1:
-            distance = objList[i].compute_point_cloud_distance(northwall)
-            min_distance = np.min(distance)
-        else:
-            distance = objList[i].compute_point_cloud_distance(wall)
-            min_distance = np.min(distance)
-        print("obj{} minDistance in {}: {}".format(i, side, min_distance))
+    # for i in range(len(obj_list)):
+    #     print("i in check: {}".format(i))
+    #     if i == len(obj_list) - 1:
+    #         distance = obj_list[i].compute_point_cloud_distance(northwall)
+    #         min_distance = np.min(distance)
+    #     else:
+    #         distance = obj_list[i].compute_point_cloud_distance(wall)
+    #         min_distance = np.min(distance)
+    #     print("obj{} minDistance in {}: {}".format(i, side, min_distance))
+    #
+    #     if min_distance < width:
+    #         print("Obj{} not enough width in {}".format(i, side))
+    #         print("{} cannot pass".format(side))
+    #         return 0
+    #     else:
+    #         stop_list.append(return_coordinates(obj_list[i], distance))
+    print("width:", width)
+    node_list = []
+    for i in range(len(obj_list)):
+        print("obj{}: {}".format(i, obj_list[i][1]))
+        node_list.append(0)
+        # check wall can pass
+        wall_distance = obj_list[i][0].compute_point_cloud_distance(wall)
+        wall_min_distance = np.min(wall_distance)
+        print("obj{} to wall distance: {}".format(i, wall_min_distance))
+        if wall_min_distance >= width:
+            node_list[i] += 1
+        # check middle can pass
+        # find the closest middle object
+        middle_obj_index = 0
+        min_middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[0][0]))
+        for x in range(len(middle_obj_list)):
+            middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[x][0]))
+            if middle_obj_distance < min_middle_obj_distance:
+                min_middle_obj_distance = middle_obj_distance
+                middle_obj_index = x
+        print("obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], x, middle_obj_list[x][1],
+                                                                   min_middle_obj_distance))
+        if min_middle_obj_distance >= width:
+            node_list[i] += 1
 
-        if min_distance < width:
-            print("Obj{} not enough width in {}".format(i, side))
-            print("{} cannot pass".format(side))
+        # both wall and middle cannot pass, so this side cannot reach destination
+        if node_list[i] == 0:
             return 0
-        else:
-            stop_list.append(return_coordinates(objList[i], distance))
-    # Add the destination point
-    stop_list.append(destination_center)
-    draw_line(stop_list)
-    return 1
+
+    # return possible path
+    possible_paths = 1
+    for i in range(len(node_list)):
+        possible_paths *= node_list[i]
+    return possible_paths
+
+    # # Add the destination point
+    # stop_list.append(destination_center)
+    # draw_line(stop_list)
+    # return 1
 
 
 def append_display_list(list):
@@ -335,11 +366,9 @@ print_sorted_object_list(middle_obj_list)
 print("sorted right:")
 print_sorted_object_list(right_obj_list)
 
-#
-# possiblePath += check_enough_space("east", eastwall, eastSide)
-# possiblePath += check_enough_space("west", westwall, westSide)
-#
-# print("\npossible path:", possiblePath)
+print("")
+left_num_of_possible_paths = check_enough_space("left", westwall, left_obj_list)
+print("left possible paths:", left_num_of_possible_paths)
 
 display_list.append(door)
 display_list.append(floor)
@@ -350,13 +379,12 @@ display_list.append(southwall)
 display_list.append(westwall)
 
 # The coordinate system
-points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
-colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
-test_pcd = open3d.geometry.PointCloud()
-test_pcd.points = open3d.utility.Vector3dVector(points)
-test_pcd.colors = open3d.utility.Vector3dVector(colors)
-display_list.append(test_pcd)
-
+# points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
+# colors = [[1, 1, 1], [1, 0, 0], [0, 1, 0], [0, 0, 1]]
+# test_pcd = open3d.geometry.PointCloud()
+# test_pcd.points = open3d.utility.Vector3dVector(points)
+# test_pcd.colors = open3d.utility.Vector3dVector(colors)
+# display_list.append(test_pcd)
 
 append_display_list(left_obj_list)
 append_display_list(middle_obj_list)
