@@ -3,7 +3,7 @@ import open3d as o3d
 import numpy as np
 
 # Load PLY file
-pcd = o3d.io.read_point_cloud("Area5_conferenceRoom1.ply")
+pcd = o3d.io.read_point_cloud("Room2.ply")
 
 # Get point colors as numpy array
 colors = np.asarray(pcd.colors)
@@ -12,7 +12,7 @@ colors = np.asarray(pcd.colors)
 unique_colors = np.unique(colors, axis=0)
 
 # Create a directory to store the output files
-dirname = os.path.splitext(os.path.basename("Area5_conferenceRoom1.ply"))[0] # Extract the file name without extension
+dirname = os.path.splitext(os.path.basename("Room2.ply"))[0] # Extract the file name without extension
 os.makedirs(dirname, exist_ok=True)
 
 # Separate points by color and create new point clouds for each color
