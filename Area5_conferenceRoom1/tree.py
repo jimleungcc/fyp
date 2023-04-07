@@ -1,0 +1,109 @@
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.children = []
+
+    def add_child(self, child):
+        self.children.append(child)
+
+    def is_leaf(self):
+        return len(self.children) == 0
+
+    # ... (Other TreeNode methods)
+
+    def add_children_to_deepest_leaves(self, values):
+        """
+        Adds children to all deepest leaf nodes in the tree.
+
+        Args:
+        - values (List): A list of values for the new children nodes.
+
+        Returns:
+        - None
+        """
+        max_depth = 0
+        deepest_leaves = []
+
+        def dfs(node, depth):
+            nonlocal max_depth, deepest_leaves
+
+            if node.is_leaf():
+                if depth > max_depth:
+                    max_depth = depth
+                    deepest_leaves = [node]
+                elif depth == max_depth:
+                    deepest_leaves.append(node)
+            else:
+                for child in node.children:
+                    dfs(child, depth + 1)
+
+        dfs(self, 0)
+
+        for leaf in deepest_leaves:
+            for value in values:
+                child = TreeNode(value)
+                leaf.add_child(child)
+
+    def add_child_to_all_nodes(self, node_value, child_value):
+        target_nodes = []
+
+        def find_nodes_with_value(node, value):
+            if node.value == value:
+                target_nodes.append(node)
+            for child in node.children:
+                find_nodes_with_value(child, value)
+
+        find_nodes_with_value(self, node_value)
+
+        if not target_nodes:
+            print(f"No TreeNode found with value {node_value}")
+        else:
+            for node in target_nodes:
+                child_node = TreeNode(child_value)
+                node.add_child(child_node)
+
+    def get_paths_to_leaves(self):
+        """
+        Returns a list of arrays, each containing the values in the path from the root to a leaf.
+
+        Returns:
+        - list of arrays: Each array contains the values in the path from the root to a leaf.
+        """
+
+        def dfs(node, path):
+            if node.is_leaf():
+                # Leaf node, add the path to the result list
+                return [path + [node.value]]
+            else:
+                # Non-leaf node, continue recursively
+                result = []
+                for child in node.children:
+                    result.extend(dfs(child, path + [node.value]))
+                return result
+
+        return dfs(self, [])
+
+
+# Create a tree with some initial nodes
+root = TreeNode(1)
+node2 = TreeNode(2)
+node3 = TreeNode(3)
+node4 = TreeNode(4)
+node5 = TreeNode(5)
+
+root.add_child(node2)
+root.add_child(node3)
+node2.add_child(node4)
+node3.add_child(node5)
+
+# Add children to the deepest leaf nodes
+root.add_children_to_deepest_leaves([6, 7, 8])
+root.add_child_to_all_nodes(8, 9)
+
+paths = root.get_paths_to_leaves()
+
+# Print the paths
+print("Paths from root to each leaf:")
+for path in paths:
+    # print(" -> ".join(str(val) for val in path))
+    print(path)

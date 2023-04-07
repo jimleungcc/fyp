@@ -322,50 +322,9 @@ def check_enough_space(side, wall, obj_list):
     print("{} object list length: {}".format(side, len(obj_list)))
     stop_list.clear()
     stop_list.append(np.array(center))
-    # for i in range(len(obj_list)):
-    #     print("i in check: {}".format(i))
-    #     if i == len(obj_list) - 1:
-    #         distance = obj_list[i].compute_point_cloud_distance(northwall)
-    #         min_distance = np.min(distance)
-    #     else:
-    #         distance = obj_list[i].compute_point_cloud_distance(wall)
-    #         min_distance = np.min(distance)
-    #     print("obj{} minDistance in {}: {}".format(i, side, min_distance))
-    #
-    #     if min_distance < width:
-    #         print("Obj{} not enough width in {}".format(i, side))
-    #         print("{} cannot pass".format(side))
-    #         return 0
-    #     else:
-    #         stop_list.append(return_coordinates(obj_list[i], distance))
+
     print("width:", width)
     node_list = []
-    # for i in range(len(obj_list)):
-    #     print("obj{}: {}".format(i, obj_list[i][1]))
-    #     node_list.append(0)
-    #     # check wall can pass
-    #     wall_distance = obj_list[i][0].compute_point_cloud_distance(wall)
-    #     wall_min_distance = np.min(wall_distance)
-    #     print("obj{} to wall distance: {}".format(i, wall_min_distance))
-    #     if wall_min_distance >= width:
-    #         node_list[i] += 1
-    #     # check middle can pass
-    #     # find the closest middle object
-    #     middle_obj_index = 0
-    #     min_middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[0][0]))
-    #     for x in range(len(middle_obj_list)):
-    #         middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[x][0]))
-    #         if middle_obj_distance < min_middle_obj_distance:
-    #             min_middle_obj_distance = middle_obj_distance
-    #             middle_obj_index = x
-    #     print("obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], x, middle_obj_list[x][1],
-    #                                                                min_middle_obj_distance))
-    #     if min_middle_obj_distance >= width:
-    #         node_list[i] += 1
-    #
-    #     # both wall and middle cannot pass, so this side cannot reach destination
-    #     if node_list[i] == 0:
-    #         return 0
 
     for i in range(len(obj_list)):
         print("\nobj{}: {}".format(i, obj_list[i][1]))
