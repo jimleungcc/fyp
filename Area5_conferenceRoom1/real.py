@@ -371,14 +371,11 @@ def check_enough_space(side, wall, obj_list):
 def set_tree(node_list):
     """node_list[i] = [ [left object pcd, name], left object coord index, [target pcd, name], target coord index,
         left object coord index, [target pcd, name], target coord index,
-        suppose there are only 2 way to go (wall, middle) , 1-3, 4-6
+        assume there are only 2 way to go (wall, middle) for each side
 
         Each node in tree should have [ [pcd, name], self_coord_index, "object-to-target"]
     """
-    # start_point = [center, "door"]
-    # root = TreeNode(start_point)
-    tree_node_list = []
-    root = TreeNode("start")
+    root = TreeNode([center, "start"])
     for i in range(len(node_list)):
         if len(node_list[i]) // 3 > 1:
             # put two node to the deepest leaf
@@ -400,30 +397,45 @@ def set_tree(node_list):
     return paths
 
 
+def calculate_distance(x1, y1, x2, y2):
+    """
+    Calculates the distance between two points with (x, y) coordinates using the Euclidean distance formula.
+    """
+    distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    return distance
+
+
+def find_shortest_path(path_list1, path_list2):
+    path_list1.extend(path_list2)
+    total_distance = []
+    for i in range(len(path_list1)):
+        total_distance.append(0)
+        for x in range(len(path_list1[i]) - 1):
+            if x == 0:
+                starting_array = path_list1[i][0][0]
+                x1, y1 = starting_array[0], starting_array[1]
+                print("starting point x1: {}, y1: {}".format(x1, y1))
+            else:
+                index = path_list1[i][x][1]
+                first_pcd = path_list1[i][x][0][0]  # point cloud
+                first_pcd_points = np.asarray(first_pcd.points)
+                first_pcd_coord = first_pcd_points[index]
+                x1, y1 = first_pcd_coord[0], first_pcd_coord[1]
+                print("\nx1: {}, y1: {}".format(x1, y1))
+
+            index = path_list1[i][x + 1][1]
+            second_pcd = path_list1[i][x + 1][0][0] # point cloud
+            second_pcd_points = np.asarray(second_pcd.points)
+            second_pcd_coord = second_pcd_points[index]
+            x2, y2 = second_pcd_coord[0], second_pcd_coord[1]
+            print("x2: {}, y2: {}".format(x2, y2))
+            total_distance[i] += calculate_distance(x1, y1, x2, y2)
+        print("path{} distance: {}".format(i, total_distance[i]))
+
+
 def append_display_list(obj_list):
     for obj in obj_list:
         display_list.append(obj[0])
-
-
-def display_node_list(node_list):
-    i = 0
-    for obj in node_list:
-        print("\nobj{}".format(i))
-        print("pcd length:", len(np.asarray(obj[0][0].points)))
-        print("pcd name", obj[0][1])
-        print("self coordinate index", obj[1])
-        # if obj[2][1] is None:
-        #     print("wall pcd length", len(obj[2]))
-        #     print("wall coordinate index", obj[3])
-        # else:
-        #     print("middle object pcd length", len(np.asarray(obj[2][0].points)))
-        #     print("middle object name", obj[2][1])
-        #     print("middle coordinate index", obj[3])
-        # if obj[4] is not None:
-        #     print("self coordinate index", obj[4])
-        #     print("object pcd length", len(np.asarray(obj[5][0]).points))
-        #     print("object name", obj[5][1])
-        #     print("object coordinate index", obj[6])
 
 
 get_section()
@@ -447,6 +459,9 @@ print("right_node_list:", right_node_list)
 
 left_paths = set_tree(left_node_list)
 right_paths = set_tree(right_node_list)
+
+# Find the shortest path
+find_shortest_path(left_paths, right_paths)
 
 display_list.append(door)
 display_list.append(floor)
