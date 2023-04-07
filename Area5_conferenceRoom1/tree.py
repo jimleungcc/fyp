@@ -85,25 +85,25 @@ class TreeNode:
 
 
 # Create a tree with some initial nodes
-root = TreeNode(1)
-node2 = TreeNode(2)
-node3 = TreeNode(3)
-node4 = TreeNode(4)
-node5 = TreeNode(5)
-
-root.add_child(node2)
-root.add_child(node3)
-node2.add_child(node4)
-node3.add_child(node5)
-
-# Add children to the deepest leaf nodes
-root.add_children_to_deepest_leaves([6, 7, 8])
-root.add_child_to_all_nodes(8, 9)
-
-paths = root.get_paths_to_leaves()
-
-# Print the paths
-print("Paths from root to each leaf:")
-for path in paths:
-    # print(" -> ".join(str(val) for val in path))
-    print(path)
+# root = TreeNode(1)
+# node2 = TreeNode(2)
+# node3 = TreeNode(3)
+# node4 = TreeNode(4)
+# node5 = TreeNode(5)
+#
+# root.add_child(node2)
+# root.add_child(node3)
+# node2.add_child(node4)
+# node3.add_child(node5)
+#
+# # Add children to the deepest leaf nodes
+# root.add_children_to_deepest_leaves([6, 7, 8])
+# root.add_child_to_all_nodes(6, 9)
+#
+# paths = root.get_paths_to_leaves()
+#
+# # Print the paths
+# print("Paths from root to each leaf:")
+# for path in paths:
+#     # print(" -> ".join(str(val) for val in path))
+#     print(path)

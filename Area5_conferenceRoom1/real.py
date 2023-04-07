@@ -2,6 +2,7 @@ import numpy as np
 import open3d as o3d
 import open3d.utility
 import math
+from tree import TreeNode
 from plyfile import PlyData, PlyElement
 
 # load all chair PLYs in the west
@@ -314,7 +315,7 @@ def get_horizontal_distance(self_object, target_object):
     # print("Shortest Euclidean Distance: ", shortest_distance)
     # print("Index in First Array: ", first_array_index)
     # print("Index in Second Array: ", second_array_index)
-    return shortest_distance
+    return shortest_distance, first_array_index, second_array_index
 
 
 def check_enough_space(side, wall, obj_list):
@@ -328,40 +329,42 @@ def check_enough_space(side, wall, obj_list):
 
     for i in range(len(obj_list)):
         print("\nobj{}: {}".format(i, obj_list[i][1]))
-        node_list.append(0)
+        node_list.append([])
+        sub_list = node_list[i]
+        sub_list.extend([obj_list[i]])
+        # node_list.append(obj_list[i][0])
         # check wall can pass
-        wall_distance = obj_list[i][0].compute_point_cloud_distance(wall)
-        wall_min_distance = get_horizontal_distance(obj_list[i][0], wall)
+        wall_min_distance, self_index, wall_index = get_horizontal_distance(obj_list[i][0], wall)
         print("obj{} to wall distance: {}".format(i, wall_min_distance))
         if wall_min_distance >= width:
-            node_list[i] += 1
+            sub_list = node_list[i]
+            sub_list.extend([self_index, wall, wall_index])
+
         # check middle can pass
         # find the closest middle object
         middle_obj_index = 0
-        # min_middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[0][0]))
-        min_middle_obj_distance = get_horizontal_distance(obj_list[i][0], middle_obj_list[0][0])
+        # initialize it from the first object in middle_obj_list
+        min_middle_min_distance_result = get_horizontal_distance(obj_list[i][0],
+                                                                 middle_obj_list[0][0])
         for x in range(len(middle_obj_list)):
-            # middle_obj_distance = np.min(obj_list[i][0].compute_point_cloud_distance(middle_obj_list[x][0]))
-            middle_obj_distance = get_horizontal_distance(obj_list[i][0], middle_obj_list[x][0])
-            print("comparing to middle obj{} {}: {}".format(x, middle_obj_list[x][1], middle_obj_distance))
-            if middle_obj_distance < min_middle_obj_distance:
-                min_middle_obj_distance = middle_obj_distance
+            current_middle_obj_result = get_horizontal_distance(obj_list[i][0], middle_obj_list[x][0])
+            # print("comparing to middle obj{} {}: {}".format(x, middle_obj_list[x][1], middle_obj_distance))
+            if current_middle_obj_result[0] < min_middle_min_distance_result[0]:
+                min_middle_obj_distance_result = current_middle_obj_result
                 middle_obj_index = x
         print("Shortest: obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], middle_obj_index,
                                                                              middle_obj_list[middle_obj_index][1],
-                                                                             min_middle_obj_distance))
-        if min_middle_obj_distance >= width:
-            node_list[i] += 1
+                                                                             min_middle_min_distance_result[0]))
+        min_middle_distance, self_index, target_index = min_middle_min_distance_result
+        if min_middle_distance >= width:
+            sub_list = node_list[i]
+            sub_list.extend([self_index, middle_obj_list[middle_obj_index], target_index])
 
-        # both wall and middle cannot pass, so this side cannot reach destination
-        if node_list[i] == 0:
-            return 0
+        # both wall and middle cannot pass, so this side cannot reach destination, the length is only 1.
+        if len(node_list[i]) == 0:
+            return node_list
 
-    # return possible path
-    possible_paths = 1
-    for i in range(len(node_list)):
-        possible_paths *= node_list[i]
-    return possible_paths
+    return node_list
 
     # # Add the destination point
     # stop_list.append(destination_center)
@@ -372,6 +375,22 @@ def check_enough_space(side, wall, obj_list):
 def append_display_list(list):
     for obj in list:
         display_list.append(obj[0])
+
+
+def display_node_list(node_list):
+    i = 0
+    for obj in node_list:
+        print("\nobj{}".format(i))
+        print("pcd length:", len(obj[0][0]))
+        print("pcd name", obj[0][1])
+        print("self coordinate index", obj[1])
+        if obj[2][1] is None:
+            print("wall pcd length", len(obj[2]))
+            print("wall coordinate index", obj[3])
+        else:
+            print("middle object pcd length", len(obj[2][0]))
+            print("middle object name", obj[2][1])
+            print("middle coordinate index", obj[3])
 
 
 get_section()
@@ -386,12 +405,12 @@ print("sorted right:")
 print_sorted_object_list(right_obj_list)
 
 print("")
-left_num_of_possible_paths = check_enough_space("left", westwall, left_obj_list)
-print("left possible paths:", left_num_of_possible_paths)
+left_node_list = check_enough_space("left", westwall, left_obj_list)
+print("left_node_list:")
 
 print("")
-right_num_of_possible_paths = check_enough_space("right", eastwall, right_obj_list)
-print("right possible paths:", right_num_of_possible_paths)
+right_node_list = check_enough_space("right", eastwall, right_obj_list)
+print("right_node_list:", right_node_list)
 
 display_list.append(door)
 display_list.append(floor)
