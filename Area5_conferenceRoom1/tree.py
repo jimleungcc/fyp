@@ -9,8 +9,6 @@ class TreeNode:
     def is_leaf(self):
         return len(self.children) == 0
 
-    # ... (Other TreeNode methods)
-
     def add_children_to_deepest_leaves(self, values):
         """
         Adds children to all deepest leaf nodes in the tree.
@@ -34,8 +32,8 @@ class TreeNode:
                 elif depth == max_depth:
                     deepest_leaves.append(node)
             else:
-                for child in node.children:
-                    dfs(child, depth + 1)
+                for node_child in node.children:
+                    dfs(node_child, depth + 1)
 
         dfs(self, 0)
 
@@ -47,10 +45,10 @@ class TreeNode:
     def add_child_to_all_nodes(self, node_value, child_value):
         target_nodes = []
 
-        def find_nodes_with_value(node, value):
-            if node.value == value:
-                target_nodes.append(node)
-            for child in node.children:
+        def find_nodes_with_value(tree_node, value):
+            if tree_node.value == value:
+                target_nodes.append(tree_node)
+            for child in tree_node.children:
                 find_nodes_with_value(child, value)
 
         find_nodes_with_value(self, node_value)
@@ -70,40 +68,40 @@ class TreeNode:
         - list of arrays: Each array contains the values in the path from the root to a leaf.
         """
 
-        def dfs(node, path):
+        def dfs(node, tree_path):
             if node.is_leaf():
                 # Leaf node, add the path to the result list
-                return [path + [node.value]]
+                return [tree_path + [node.value]]
             else:
                 # Non-leaf node, continue recursively
                 result = []
                 for child in node.children:
-                    result.extend(dfs(child, path + [node.value]))
+                    result.extend(dfs(child, tree_path + [node.value]))
                 return result
 
         return dfs(self, [])
 
 
 # Create a tree with some initial nodes
-# root = TreeNode(1)
-# node2 = TreeNode(2)
-# node3 = TreeNode(3)
-# node4 = TreeNode(4)
-# node5 = TreeNode(5)
-#
-# root.add_child(node2)
-# root.add_child(node3)
-# node2.add_child(node4)
-# node3.add_child(node5)
-#
-# # Add children to the deepest leaf nodes
-# root.add_children_to_deepest_leaves([6, 7, 8])
+root = TreeNode(1)
+node2 = TreeNode(2)
+node3 = TreeNode(3)
+node4 = TreeNode(4)
+node5 = TreeNode(5)
+
+root.add_child(node2)
+root.add_child(node3)
+node2.add_child(node4)
+node3.add_child(node5)
+
+# Add children to the deepest leaf nodes
+root.add_children_to_deepest_leaves([6])
 # root.add_child_to_all_nodes(6, 9)
-#
-# paths = root.get_paths_to_leaves()
-#
-# # Print the paths
-# print("Paths from root to each leaf:")
-# for path in paths:
-#     # print(" -> ".join(str(val) for val in path))
-#     print(path)
+
+paths = root.get_paths_to_leaves()
+
+# Print the paths
+print("Paths from root to each leaf:")
+for path in paths:
+    # print(" -> ".join(str(val) for val in path))
+    print(path)

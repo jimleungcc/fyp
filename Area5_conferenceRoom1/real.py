@@ -23,9 +23,9 @@ floor = o3d.io.read_point_cloud("floor.ply")
 
 # load all wall PLYs
 northwall = o3d.io.read_point_cloud("northwall_combine.ply")
-eastwall = o3d.io.read_point_cloud("eastwall_combine.ply")
+eastwall = [o3d.io.read_point_cloud("eastwall_combine.ply"), "eastwall"]
 southwall = o3d.io.read_point_cloud("southwall.ply")
-westwall = o3d.io.read_point_cloud("westwall_combine.ply")
+westwall = [o3d.io.read_point_cloud("westwall_combine.ply"), "westwall"]
 
 object_list = []
 object_list.append([table, "table"])
@@ -55,7 +55,7 @@ destination_center = destination_box.get_center()
 
 width = width / 2  # half width of the door
 print("door width/2:", width)  # 0.4681645000000003
-width = 0.001
+width = 0.2
 possiblePath = 0
 west_stop_list = []
 east_stop_list = []
@@ -311,10 +311,6 @@ def get_horizontal_distance(self_object, target_object):
             first_array_index = i
             second_array_index = min_distance_index
 
-    # Output the shortest distance and corresponding indices
-    # print("Shortest Euclidean Distance: ", shortest_distance)
-    # print("Index in First Array: ", first_array_index)
-    # print("Index in Second Array: ", second_array_index)
     return shortest_distance, first_array_index, second_array_index
 
 
@@ -334,7 +330,7 @@ def check_enough_space(side, wall, obj_list):
         sub_list.extend([obj_list[i]])
         # node_list.append(obj_list[i][0])
         # check wall can pass
-        wall_min_distance, self_index, wall_index = get_horizontal_distance(obj_list[i][0], wall)
+        wall_min_distance, self_index, wall_index = get_horizontal_distance(obj_list[i][0], wall[0])
         print("obj{} to wall distance: {}".format(i, wall_min_distance))
         if wall_min_distance >= width:
             sub_list = node_list[i]
@@ -350,7 +346,7 @@ def check_enough_space(side, wall, obj_list):
             current_middle_obj_result = get_horizontal_distance(obj_list[i][0], middle_obj_list[x][0])
             # print("comparing to middle obj{} {}: {}".format(x, middle_obj_list[x][1], middle_obj_distance))
             if current_middle_obj_result[0] < min_middle_min_distance_result[0]:
-                min_middle_obj_distance_result = current_middle_obj_result
+                min_middle_min_distance_result = current_middle_obj_result
                 middle_obj_index = x
         print("Shortest: obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], middle_obj_index,
                                                                              middle_obj_list[middle_obj_index][1],
@@ -372,6 +368,42 @@ def check_enough_space(side, wall, obj_list):
     # return 1
 
 
+def set_tree(node_list):
+    """node_list[i] = [ [left object pcd, name], left object coord index, [target pcd, name], target coord index,
+        left object coord index, [target pcd, name], target coord index,
+        suppose there are only 2 way to go (wall, middle) , 1-3, 4-6
+
+        Each node in tree should have [ [pcd, name], self_coord_index, [target_pcd, name], target_coord_index]
+    """
+    # start_point = [center, "door"]
+    # root = TreeNode(start_point)
+    tree_node_list = []
+    root = TreeNode("start")
+    for i in range(len(node_list)):
+        print("node_list[{}] length: {}".format(i, len(node_list[i])))
+        # if len(node_list[i]) // 3 > 1:
+        #     # put two nodes to the deepest leaf
+        #     root.add_children_to_deepest_leaves([[node_list[i][0], node_list[i][1], node_list[i][2], node_list[i][3]],
+        #                                          [node_list[i][0], node_list[i][4], node_list[i][5], node_list[i][6]]
+        #                                          ])
+        # else:
+        #     # put the only node to the deepest leaf
+        #     root.add_children_to_deepest_leaves([node_list[i][0], node_list[i][1], node_list[i][2], node_list[i][3]])
+        if len(node_list[i]) // 3 > 1:
+            # put two node to the deepest leaf
+            name1 = node_list[i][0][1] + node_list[i][2][1]
+            name2 = node_list[i][0][1] + node_list[i][5][1]
+            root.add_children_to_deepest_leaves([name1, name2])
+        else:
+            name = node_list[i][0][1] + node_list[i][2][1]
+            root.add_children_to_deepest_leaves([name])
+
+    paths = root.get_paths_to_leaves()
+    print("Paths from root to each leaf:")
+    for path in paths:
+        print(path)
+
+
 def append_display_list(list):
     for obj in list:
         display_list.append(obj[0])
@@ -381,16 +413,21 @@ def display_node_list(node_list):
     i = 0
     for obj in node_list:
         print("\nobj{}".format(i))
-        print("pcd length:", len(obj[0][0]))
+        print("pcd length:", len(np.asarray(obj[0][0].points)))
         print("pcd name", obj[0][1])
         print("self coordinate index", obj[1])
-        if obj[2][1] is None:
-            print("wall pcd length", len(obj[2]))
-            print("wall coordinate index", obj[3])
-        else:
-            print("middle object pcd length", len(obj[2][0]))
-            print("middle object name", obj[2][1])
-            print("middle coordinate index", obj[3])
+        # if obj[2][1] is None:
+        #     print("wall pcd length", len(obj[2]))
+        #     print("wall coordinate index", obj[3])
+        # else:
+        #     print("middle object pcd length", len(np.asarray(obj[2][0].points)))
+        #     print("middle object name", obj[2][1])
+        #     print("middle coordinate index", obj[3])
+        # if obj[4] is not None:
+        #     print("self coordinate index", obj[4])
+        #     print("object pcd length", len(np.asarray(obj[5][0]).points))
+        #     print("object name", obj[5][1])
+        #     print("object coordinate index", obj[6])
 
 
 get_section()
@@ -406,19 +443,21 @@ print_sorted_object_list(right_obj_list)
 
 print("")
 left_node_list = check_enough_space("left", westwall, left_obj_list)
-print("left_node_list:")
+print("left_node_list:", left_node_list)
 
 print("")
 right_node_list = check_enough_space("right", eastwall, right_obj_list)
 print("right_node_list:", right_node_list)
 
+set_tree(left_node_list)
+
 display_list.append(door)
 display_list.append(floor)
 
 display_list.append(northwall)
-display_list.append(eastwall)
+display_list.append(eastwall[0])
 display_list.append(southwall)
-display_list.append(westwall)
+display_list.append(westwall[0])
 
 # The coordinate system
 # points = np.array([[0.1, 0.1, 0.1], [1, 0, 0], [0, 1, 0], [0, 0, 1]])
