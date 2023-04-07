@@ -373,39 +373,35 @@ def set_tree(node_list):
         left object coord index, [target pcd, name], target coord index,
         suppose there are only 2 way to go (wall, middle) , 1-3, 4-6
 
-        Each node in tree should have [ [pcd, name], self_coord_index, [target_pcd, name], target_coord_index]
+        Each node in tree should have [ [pcd, name], self_coord_index, "object-to-target"]
     """
     # start_point = [center, "door"]
     # root = TreeNode(start_point)
     tree_node_list = []
     root = TreeNode("start")
     for i in range(len(node_list)):
-        print("node_list[{}] length: {}".format(i, len(node_list[i])))
-        # if len(node_list[i]) // 3 > 1:
-        #     # put two nodes to the deepest leaf
-        #     root.add_children_to_deepest_leaves([[node_list[i][0], node_list[i][1], node_list[i][2], node_list[i][3]],
-        #                                          [node_list[i][0], node_list[i][4], node_list[i][5], node_list[i][6]]
-        #                                          ])
-        # else:
-        #     # put the only node to the deepest leaf
-        #     root.add_children_to_deepest_leaves([node_list[i][0], node_list[i][1], node_list[i][2], node_list[i][3]])
         if len(node_list[i]) // 3 > 1:
             # put two node to the deepest leaf
-            name1 = node_list[i][0][1] + node_list[i][2][1]
-            name2 = node_list[i][0][1] + node_list[i][5][1]
-            root.add_children_to_deepest_leaves([name1, name2])
+            name = node_list[i][0][1] + "-" + node_list[i][2][1]
+            node_info = [node_list[i][0], node_list[i][1], name]
+
+            name2 = node_list[i][0][1] + "-" + node_list[i][5][1]
+            node_info2 = [node_list[i][0], node_list[i][4], name2]
+            root.add_children_to_deepest_leaves([node_info, node_info2])
         else:
             name = node_list[i][0][1] + node_list[i][2][1]
-            root.add_children_to_deepest_leaves([name])
+            node_info = [node_list[i][0], node_list[i][1], name]
+            root.add_children_to_deepest_leaves([node_info])
 
     paths = root.get_paths_to_leaves()
     print("Paths from root to each leaf:")
     for path in paths:
         print(path)
+    return paths
 
 
-def append_display_list(list):
-    for obj in list:
+def append_display_list(obj_list):
+    for obj in obj_list:
         display_list.append(obj[0])
 
 
@@ -449,7 +445,8 @@ print("")
 right_node_list = check_enough_space("right", eastwall, right_obj_list)
 print("right_node_list:", right_node_list)
 
-set_tree(left_node_list)
+left_paths = set_tree(left_node_list)
+right_paths = set_tree(right_node_list)
 
 display_list.append(door)
 display_list.append(floor)
