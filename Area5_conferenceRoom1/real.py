@@ -52,6 +52,7 @@ print("start center coord:", center)
 
 destination_box = northwall.get_axis_aligned_bounding_box()
 destination_center = destination_box.get_center()
+print("destination center:", destination_center)
 
 width = width / 2  # half width of the door
 print("door width/2:", width)  # 0.4681645000000003
@@ -390,6 +391,8 @@ def set_tree(node_list):
             node_info = [node_list[i][0], node_list[i][1], name]
             root.add_children_to_deepest_leaves([node_info])
 
+    dest_node = [destination_center, 'destination']
+    root.add_children_to_deepest_leaves([dest_node])
     paths = root.get_paths_to_leaves()
     print("Paths from root to each leaf:")
     for path in paths:
@@ -412,6 +415,7 @@ def find_shortest_path(path_list1, path_list2):
     for i in range(len(path_list1)):
         total_distance.append(0)
         sub_list = []
+        print("path{}: {}".format(i, path_list1[i]))
         for x in range(len(path_list1[i]) - 1):
             if x == 0:
                 starting_array = path_list1[i][0][0]
@@ -425,17 +429,24 @@ def find_shortest_path(path_list1, path_list2):
                 x1, y1 = first_pcd_coord[0], first_pcd_coord[1]
                 print("\nx1: {}, y1: {}".format(x1, y1))
 
-            index = path_list1[i][x + 1][1]
-            second_pcd = path_list1[i][x + 1][0][0] # point cloud
-            second_pcd_points = np.asarray(second_pcd.points)
-            second_pcd_coord = second_pcd_points[index]
-            x2, y2 = second_pcd_coord[0], second_pcd_coord[1]
+            if x == len(path_list1[i]) - 2:
+                destination_array = path_list1[i][len(path_list1[i]) - 1][0]
+                x2, y2 = destination_array[0], destination_array[1]
+                print("destination x2: {}, y2: {}".format(x2, y2))
+            else:
+                index = path_list1[i][x + 1][1]
+                second_pcd = path_list1[i][x + 1][0][0]  # point cloud
+                second_pcd_points = np.asarray(second_pcd.points)
+                second_pcd_coord = second_pcd_points[index]
+                x2, y2 = second_pcd_coord[0], second_pcd_coord[1]
+
             print("x2: {}, y2: {}".format(x2, y2))
             total_distance[i] += calculate_distance(x1, y1, x2, y2)
             sub_list.append(x1)
             sub_list.append(y1)
-            sub_list.append(x2)
-            sub_list.append(y2)
+            if x == len(path_list1[i]) - 2:
+                sub_list.append(x2)
+                sub_list.append(y2)
         paths_coord.append(sub_list)
         print("path{} distance: {}".format(i, total_distance[i]))
 
@@ -451,6 +462,17 @@ def find_shortest_path(path_list1, path_list2):
     print("path{} has the shortest distance: {}".format(shortest_distance_index, shortest_distance))
     print("\nshortest path coord:", paths_coord[shortest_distance_index])
     # draw line to plot the path
+    shortest_coord_array = paths_coord[shortest_distance_index]
+    for i in range(len(shortest_coord_array) // 2 - 1):
+        x = i * 2
+        coord_x1, coord_y1, coord_z1 = shortest_coord_array[x], shortest_coord_array[x + 1], 0.8
+        coord_x2, coord_y2, coord_z2 = shortest_coord_array[x + 2], shortest_coord_array[x + 3], 0.8
+        arr1 = [coord_x1, coord_y1, coord_z1]
+        arr2 = [coord_x2, coord_y2, coord_z2]
+        line_set = o3d.geometry.LineSet()
+        line_set.points = o3d.utility.Vector3dVector(np.array([arr1, arr2]))
+        line_set.lines = o3d.utility.Vector2iVector(np.array([[0, 1]]))
+        display_list.append(line_set)
 
 
 def append_display_list(obj_list):
@@ -503,7 +525,7 @@ append_display_list(left_obj_list)
 append_display_list(middle_obj_list)
 append_display_list(right_obj_list)
 
-# shortest_path_pcd = o3d.io.read_point_cloud("shortest_path.ply")
-# display_list.append(shortest_path_pcd)
+shortest_path_pcd = o3d.io.read_point_cloud("shortest_path.ply")
+display_list.append(shortest_path_pcd)
 
 o3d.visualization.draw_geometries(display_list)
