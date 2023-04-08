@@ -408,8 +408,10 @@ def calculate_distance(x1, y1, x2, y2):
 def find_shortest_path(path_list1, path_list2):
     path_list1.extend(path_list2)
     total_distance = []
+    paths_coord = []
     for i in range(len(path_list1)):
         total_distance.append(0)
+        sub_list = []
         for x in range(len(path_list1[i]) - 1):
             if x == 0:
                 starting_array = path_list1[i][0][0]
@@ -430,7 +432,25 @@ def find_shortest_path(path_list1, path_list2):
             x2, y2 = second_pcd_coord[0], second_pcd_coord[1]
             print("x2: {}, y2: {}".format(x2, y2))
             total_distance[i] += calculate_distance(x1, y1, x2, y2)
+            sub_list.append(x1)
+            sub_list.append(y1)
+            sub_list.append(x2)
+            sub_list.append(y2)
+        paths_coord.append(sub_list)
         print("path{} distance: {}".format(i, total_distance[i]))
+
+    print("paths_coord:", paths_coord)
+
+    shortest_distance = 99999
+    shortest_distance_index = 0
+    for i in range(len(total_distance)):
+        distance = total_distance[i]
+        if distance < shortest_distance:
+            shortest_distance = distance
+            shortest_distance_index = i
+    print("path{} has the shortest distance: {}".format(shortest_distance_index, shortest_distance))
+    print("\nshortest path coord:", paths_coord[shortest_distance_index])
+    # draw line to plot the path
 
 
 def append_display_list(obj_list):
@@ -482,5 +502,8 @@ display_list.append(westwall[0])
 append_display_list(left_obj_list)
 append_display_list(middle_obj_list)
 append_display_list(right_obj_list)
+
+# shortest_path_pcd = o3d.io.read_point_cloud("shortest_path.ply")
+# display_list.append(shortest_path_pcd)
 
 o3d.visualization.draw_geometries(display_list)
