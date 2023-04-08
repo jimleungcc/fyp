@@ -2,8 +2,8 @@ import open3d as o3d
 import numpy as np
 
 # Load two point clouds
-pcd1 = o3d.io.read_point_cloud("westchair1.ply")
-pcd2 = o3d.io.read_point_cloud("westwall_combine.ply")
+pcd1 = o3d.io.read_point_cloud("Area_5/westchair1.ply")
+pcd2 = o3d.io.read_point_cloud("Area_5/westwall_combine.ply")
 
 # Compute point cloud distances
 distances = pcd1.compute_point_cloud_distance(pcd2)

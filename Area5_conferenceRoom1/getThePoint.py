@@ -2,8 +2,8 @@ import open3d as o3d
 import numpy as np
 
 # Load the point clouds
-pcd1 = o3d.io.read_point_cloud("westwall_combine.ply")
-pcd2 = o3d.io.read_point_cloud("westchair1.ply")
+pcd1 = o3d.io.read_point_cloud("Area_5/westwall_combine.ply")
+pcd2 = o3d.io.read_point_cloud("Area_5/westchair1.ply")
 
 # Convert the point clouds to numpy arrays
 pcd1_np = np.asarray(pcd1.points)

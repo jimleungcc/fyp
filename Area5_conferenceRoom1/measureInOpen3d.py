@@ -1,7 +1,7 @@
 import open3d as o3d
 
 # Load a PLY file
-pcd = o3d.io.read_point_cloud("northwall_combine.ply")
+pcd = o3d.io.read_point_cloud("Area_5/northwall_combine.ply")
 
 # Get the AABB of the point cloud
 aabb = pcd.get_axis_aligned_bounding_box()

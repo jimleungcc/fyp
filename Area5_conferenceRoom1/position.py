@@ -2,12 +2,12 @@ import open3d as o3d
 import numpy as np
 
 # Load the PLY file
-pcd1 = o3d.io.read_point_cloud("eastchair1.ply")
-pcd2 = o3d.io.read_point_cloud("westchair4.ply")
-pcd3 = o3d.io.read_point_cloud("eastchair2.ply")
-pcd4 = o3d.io.read_point_cloud("westchair3.ply")
-pcd5 = o3d.io.read_point_cloud("westchair1.ply")
-pcd6 = o3d.io.read_point_cloud("table.ply")
+pcd1 = o3d.io.read_point_cloud("Area_5/eastchair1.ply")
+pcd2 = o3d.io.read_point_cloud("Area_5/westchair4.ply")
+pcd3 = o3d.io.read_point_cloud("Area_5/eastchair2.ply")
+pcd4 = o3d.io.read_point_cloud("Area_5/westchair3.ply")
+pcd5 = o3d.io.read_point_cloud("Area_5/westchair1.ply")
+pcd6 = o3d.io.read_point_cloud("Area_5/table.ply")
 
 # # Define the desired position as a numpy array
 # pcd1_position = np.array([0, 0, 0])

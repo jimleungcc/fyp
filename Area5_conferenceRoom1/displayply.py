@@ -3,10 +3,10 @@ import numpy as np
 
 # Load two point clouds
 pcd1 = o3d.io.read_point_cloud("door.ply")
-pcd2 = o3d.io.read_point_cloud("table.ply")
-pcd3 = o3d.io.read_point_cloud("westchair4.ply")
-pcd4 = o3d.io.read_point_cloud("eastchair2.ply")
-pcd5 = o3d.io.read_point_cloud("westchair3.ply")
+pcd2 = o3d.io.read_point_cloud("Area_5/table.ply")
+pcd3 = o3d.io.read_point_cloud("Area_5/westchair4.ply")
+pcd4 = o3d.io.read_point_cloud("Area_5/eastchair2.ply")
+pcd5 = o3d.io.read_point_cloud("Area_5/westchair3.ply")
 
 # Adjust position of object
 pcd1.translate([10,0.0,0.0])

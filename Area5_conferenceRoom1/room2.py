@@ -3,44 +3,78 @@ import open3d as o3d
 import open3d.utility
 import math
 from tree import TreeNode
-from plyfile import PlyData, PlyElement
 
+
+"""
+Read point cloud files here
+"""
 # load all chair PLYs in the west
-westchair1 = o3d.io.read_point_cloud("Area_5/westchair1.ply")
-westchair2 = o3d.io.read_point_cloud("Area_5/westchair2.ply")
-westchair3 = o3d.io.read_point_cloud("Area_5/westchair3.ply")
-westchair4 = o3d.io.read_point_cloud("Area_5/westchair4.ply")
+westchair1 = o3d.io.read_point_cloud("../Room2/included/westchair1.ply")
+westchair3 = o3d.io.read_point_cloud("../Room2/included/westchair3.ply")
+westchair4 = o3d.io.read_point_cloud("../Room2/included/westchair4.ply")
+westchair5 = o3d.io.read_point_cloud("../Room2/included/westchair5.ply")
+westchair6 = o3d.io.read_point_cloud("../Room2/included/westchair6.ply")
+westchair7 = o3d.io.read_point_cloud("../Room2/included/westchair7.ply")
 
 # load all chair PLYs in the east
-eastchair1 = o3d.io.read_point_cloud("Area_5/eastchair1.ply")
-eastchair2 = o3d.io.read_point_cloud("Area_5/eastchair2.ply")
-eastchair3 = o3d.io.read_point_cloud("Area_5/eastchair3.ply")
+eastchair1 = o3d.io.read_point_cloud("../Room2/included/eastchair1.ply")
+eastchair2 = o3d.io.read_point_cloud("../Room2/included/eastchair2.ply")
+eastchair3 = o3d.io.read_point_cloud("../Room2/included/eastchair3.ply")
+
+# load all chair PLYs in the middle
+middlechair1 = o3d.io.read_point_cloud("../Room2/included/middlechair1.ply")
+middlechair2 = o3d.io.read_point_cloud("../Room2/included/middlechair2.ply")
+middlechair3 = o3d.io.read_point_cloud("../Room2/included/middlechair3.ply")
 
 # load table, floor and door
-table = o3d.io.read_point_cloud("Area_5/table.ply")
-door = o3d.io.read_point_cloud("door.ply")
-floor = o3d.io.read_point_cloud("Area_5/floor.ply")
+table1 = o3d.io.read_point_cloud("../Room2/included/table1.ply")
+table2 = o3d.io.read_point_cloud("../Room2/included/table2.ply")
+table3 = o3d.io.read_point_cloud("../Room2/included/table3.ply")
+door = o3d.io.read_point_cloud("../Room2/included/door.ply")
+floor = o3d.io.read_point_cloud("../Room2/included/floor.ply")
 
 # load all wall PLYs
-northwall = o3d.io.read_point_cloud("Area_5/northwall_combine.ply")
-eastwall = [o3d.io.read_point_cloud("Area_5/eastwall_combine.ply"), "eastwall"]
-southwall = o3d.io.read_point_cloud("Area_5/southwall.ply")
-westwall = [o3d.io.read_point_cloud("Area_5/westwall_combine.ply"), "westwall"]
+northwall = o3d.io.read_point_cloud("../Room2/included/northwall_combine.ply")
+eastwall = [o3d.io.read_point_cloud("../Room2/included/eastwall_combine.ply"), "eastwall"]
+southwall = o3d.io.read_point_cloud("../Room2/included/southwall_combine.ply")
+westwall = [o3d.io.read_point_cloud("../Room2/included/westwall_combine.ply"), "westwall"]
 
+eastwall[0] = eastwall[0].voxel_down_sample(voxel_size=0.05)
+westwall[0] = westwall[0].voxel_down_sample(voxel_size=0.05)
+
+# append all point cloud object to the object list (without any wall)
 object_list = []
-object_list.append([table, "table"])
 object_list.append([westchair1, "westchair1"])
-object_list.append([eastchair1, "eastchair1"])
-object_list.append([westchair2, "westchair2"])
-object_list.append([eastchair2, "eastchair2"])
 object_list.append([westchair3, "westchair3"])
-object_list.append([eastchair3, "eastchair3"])
 object_list.append([westchair4, "westchair4"])
+object_list.append([westchair5, "westchair5"])
+object_list.append([westchair6, "westchair6"])
+object_list.append([westchair7, "westchair7"])
 
-# Assume the object width is same as the door
+object_list.append([eastchair1, "eastchair1"])
+object_list.append([eastchair2, "eastchair2"])
+object_list.append([eastchair3, "eastchair3"])
+
+object_list.append([middlechair1, "middlechair1"])
+object_list.append([middlechair2, "middlechair2"])
+object_list.append([middlechair3, "middlechair3"])
+
+object_list.append([table1, "table1"])
+object_list.append([table2, "table2"])
+object_list.append([table3, "table3"])
+
+for i in range(len(object_list)):
+    object_list[i][0] = object_list[i][0].voxel_down_sample(voxel_size=0.05)
+
+# *** door and floor no need to give name
+"""
+End of Read point cloud files here
+"""
+
+
+# Assume the starting point is the door
 # Get the axis_aligned_bounding_box of the point cloud
 aabb = door.get_axis_aligned_bounding_box()
-# Get the width of the AABB
 width = (aabb.get_max_bound()[0] - aabb.get_min_bound()[0])
 # print("Width of the door: ", width)
 height = (aabb.get_max_bound()[2] - aabb.get_min_bound()[2])
@@ -50,19 +84,17 @@ length = (aabb.get_max_bound()[1] - aabb.get_min_bound()[1])
 center = aabb.get_center()
 print("start center coord:", center)
 
+# Middle of the northwall is the destination
 destination_box = northwall.get_axis_aligned_bounding_box()
 destination_center = destination_box.get_center()
 print("destination center:", destination_center)
 
-width = width / 2  # half width of the door
-print("door width/2:", width)  # 0.4681645000000003
-width = 0.4
-possiblePath = 0
-west_stop_list = []
-east_stop_list = []
-stop_list = []
+# Define the object width
+width = 1
+
 display_list = []
 
+# Declare the left, middle, right object list for later process
 left_obj_list = []
 middle_obj_list = []
 right_obj_list = []
@@ -165,13 +197,17 @@ def get_section():
 
     sorted_idx = np.argsort(floorbox_8points[:, 0])
     sorted_a = floorbox_8points[sorted_idx]
-    # print("sorted floor 8 points: ", sorted_a)
-    # print("\n")
+    print("sorted floor 8 points: \n", sorted_a)
+    print("\n")
+
+    """
+    Need to adjust these index to get the correct coordinates
+    """
     rect_points = []
-    rect_points.append(sorted_a[6])
     rect_points.append(sorted_a[4])
     rect_points.append(sorted_a[0])
     rect_points.append(sorted_a[2])
+    rect_points.append(sorted_a[6])
     # 7 > 5 > 1 > 3
     print("rect_points\n", rect_points)
 
@@ -185,9 +221,6 @@ def get_section():
                                                                      rect_points[3][0], rect_points[3][1])
     print("\nline2 1/3", line2_first_third)
     print("line2 2/3", line2_second_third)
-
-    correct4points = o3d.io.read_point_cloud("./reference_plys/correct_floor4point.ply")
-    display_list.append(correct4points)
 
     # left section
     left_rectangle_area = get_rectangle_area(rect_points[0], line1_second_third, line2_second_third, rect_points[3])
@@ -293,8 +326,6 @@ def get_horizontal_distance(self_object, target_object):
 def check_enough_space(side, wall, obj_list):
     print("\nTest {}:".format(side))
     print("{} object list length: {}".format(side, len(obj_list)))
-    stop_list.clear()
-    stop_list.append(np.array(center))
 
     print("width:", width)
     node_list = []
@@ -333,10 +364,10 @@ def check_enough_space(side, wall, obj_list):
             sub_list.extend([self_index, middle_obj_list[middle_obj_index], target_index])
 
         # both wall and middle cannot pass, so this side cannot reach destination, the length is only 1.
-        if len(node_list[i]) == 0:
-            return node_list
+        if len(node_list[i]) == 1:
+            return node_list, False
 
-    return node_list
+    return node_list, True
 
     # # Add the destination point
     # stop_list.append(destination_center)
@@ -383,8 +414,17 @@ def calculate_distance(x1, y1, x2, y2):
     return distance
 
 
-def find_shortest_path(path_list1, path_list2):
-    path_list1.extend(path_list2)
+def find_shortest_path(path_list1, path1_can_pass, path_list2, path2_can_pass):
+    if path1_can_pass and path2_can_pass:
+        path_list1.extend(path_list2)
+    if path1_can_pass and not path2_can_pass:
+        path_list1 = path_list1
+    if not path1_can_pass and path2_can_pass:
+        path_list1 = path_list2
+    if not path1_can_pass and not path2_can_pass:
+        print("\n<<<<<<<<<<<<<<< NO PATH CAN REACH DESTINATION >>>>>>>>>>>>>>>")
+        return
+
     total_distance = []
     paths_coord = []
     for i in range(len(path_list1)):
@@ -455,6 +495,9 @@ def append_display_list(obj_list):
         display_list.append(obj[0])
 
 
+"""
+Start from here can be commented to debug
+"""
 get_section()
 sort_object_list(left_obj_list, door)
 sort_object_list(middle_obj_list, door)
@@ -467,19 +510,35 @@ print("sorted right:")
 print_sorted_object_list(right_obj_list)
 
 print("")
-left_node_list = check_enough_space("left", westwall, left_obj_list)
+left_node_list, left_can_pass = check_enough_space("left", westwall, left_obj_list)
 print("left_node_list:", left_node_list)
+print("left can pass?", left_can_pass)
 
 print("")
-right_node_list = check_enough_space("right", eastwall, right_obj_list)
+right_node_list, right_can_pass = check_enough_space("right", eastwall, right_obj_list)
 print("right_node_list:", right_node_list)
+print("right can pass?", right_can_pass)
 
-left_paths = set_tree(left_node_list)
-right_paths = set_tree(right_node_list)
-
+if left_can_pass:
+    left_paths = set_tree(left_node_list)
+else:
+    left_paths = []
+if right_can_pass:
+    right_paths = set_tree(right_node_list)
+else:
+    right_paths = []
 # Find the shortest path
-find_shortest_path(left_paths, right_paths)
+find_shortest_path(left_paths, left_can_pass, right_paths, right_can_pass)
+"""
+End here can be commented to debug
+"""
 
+# append pcd file for debugging
+# floor_eight_points = o3d.io.read_point_cloud("../Room2/reference point clouds/floor_eight_points.ply")
+# display_list.append(floor_eight_points)
+
+
+# config the point clouds to be displayed
 display_list.append(door)
 display_list.append(floor)
 

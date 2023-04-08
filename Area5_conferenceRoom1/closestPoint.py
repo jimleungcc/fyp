@@ -2,7 +2,7 @@ import open3d as o3d
 import numpy as np
 
 pcd1 = o3d.io.read_point_cloud("door.ply")
-pcd2 = o3d.io.read_point_cloud("table.ply")
+pcd2 = o3d.io.read_point_cloud("Area_5/table.ply")
 
 # Compute point-to-point distances
 distance = pcd1.compute_point_cloud_distance(pcd2)
