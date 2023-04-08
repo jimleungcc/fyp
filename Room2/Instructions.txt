@@ -1,0 +1,12 @@
+1. Use meshlab to find the object ply
+2. Run the convertPLYencoding.py in the SAME directory, where the ply files located.
+3. Run the combinePLY.py to combine ply files.
+4. append to the object_list and also give an object name
+
+5. be aware of the floor point cloud, to see where are some outliers points
+6. Check the bounding box point, adjust the index in get_section:
+    rect_points.append(sorted_a[4])
+    rect_points.append(sorted_a[0])
+    rect_points.append(sorted_a[2])
+    rect_points.append(sorted_a[6])
+7.
