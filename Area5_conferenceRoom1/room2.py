@@ -90,7 +90,7 @@ destination_center = destination_box.get_center()
 print("destination center:", destination_center)
 
 # Define the object width
-width = 1
+width = 0.3
 
 display_list = []
 
