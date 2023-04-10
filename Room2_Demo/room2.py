@@ -7,49 +7,72 @@ import time
 
 st = time.time()
 """
-    load all PLY files in here
+    P1: load all PLY files in here, modify this part to load the required obstacles and walls.
+    The below is a reference about how to load the PLY files correctly in this program
 """
 # load all chair PLYs in the west
-westchair1 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westchair1.ply")
-westchair2 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westchair2.ply")
-westchair3 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westchair3.ply")
-westchair4 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westchair4.ply")
+westchair1 = o3d.io.read_point_cloud("room2_useful_ply/westchair1.ply")
+westchair3 = o3d.io.read_point_cloud("room2_useful_ply/westchair3.ply")
+westchair4 = o3d.io.read_point_cloud("room2_useful_ply/westchair4.ply")
+westchair5 = o3d.io.read_point_cloud("room2_useful_ply/westchair5.ply")
+westchair6 = o3d.io.read_point_cloud("room2_useful_ply/westchair6.ply")
+westchair7 = o3d.io.read_point_cloud("room2_useful_ply/westchair7.ply")
 
 # load all chair PLYs in the east
-eastchair1 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/eastchair1.ply")
-eastchair2 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/eastchair2.ply")
-eastchair3 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/eastchair3.ply")
+eastchair1 = o3d.io.read_point_cloud("room2_useful_ply/eastchair1.ply")
+eastchair2 = o3d.io.read_point_cloud("room2_useful_ply/eastchair2.ply")
+eastchair3 = o3d.io.read_point_cloud("room2_useful_ply/eastchair3.ply")
+
+# load all chair PLYs in the middle
+middlechair1 = o3d.io.read_point_cloud("room2_useful_ply/middlechair1.ply")
+middlechair2 = o3d.io.read_point_cloud("room2_useful_ply/middlechair2.ply")
+middlechair3 = o3d.io.read_point_cloud("room2_useful_ply/middlechair3.ply")
 
 # load table, floor and door
-table = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/table.ply")
-door = o3d.io.read_point_cloud("Area5_conferenceRoom1/door.ply")
-floor = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/floor.ply")
+table1 = o3d.io.read_point_cloud("room2_useful_ply/table1.ply")
+table2 = o3d.io.read_point_cloud("room2_useful_ply/table2.ply")
+table3 = o3d.io.read_point_cloud("room2_useful_ply/table3.ply")
+door = o3d.io.read_point_cloud("room2_useful_ply/door.ply")
+floor = o3d.io.read_point_cloud("room2_useful_ply/floor.ply")
 
 # load all wall PLYs
-northwall = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/northwall_combine.ply")
-eastwall = [o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/eastwall_combine.ply"), "eastwall"]
-southwall = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/southwall.ply")
-westwall = [o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westwall_combine.ply"), "westwall"]
+# westwall = left wall, eastwall = right wall, southwall = starting point wall, northwall = destination wall
+# westwall and eastwall must follow the format:
+# westwall = [o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westwall_combine.ply"), "westwall"]
+northwall = o3d.io.read_point_cloud("room2_useful_ply/northwall_combine.ply")
+eastwall = [o3d.io.read_point_cloud("room2_useful_ply/eastwall_combine.ply"), "eastwall"]
+southwall = o3d.io.read_point_cloud("room2_useful_ply/southwall_combine.ply")
+westwall = [o3d.io.read_point_cloud("room2_useful_ply/westwall_combine.ply"), "westwall"]
 """
-    End: load all PLY files
+    End: P1 load all PLY files
 """
 
 """
-    Append all obstacles to the obstacles_list in here, 
+    P2: Append all obstacles to the obstacles_list in here, 
     walls are not considered as obstacles.
     The data structure must be [loaded point cloud, "name of the point cloud"]
 """
 obstacles_list = []
-obstacles_list.append([table, "table"])
 obstacles_list.append([westchair1, "westchair1"])
-obstacles_list.append([eastchair1, "eastchair1"])
-obstacles_list.append([westchair2, "westchair2"])
-obstacles_list.append([eastchair2, "eastchair2"])
 obstacles_list.append([westchair3, "westchair3"])
-obstacles_list.append([eastchair3, "eastchair3"])
 obstacles_list.append([westchair4, "westchair4"])
+obstacles_list.append([westchair5, "westchair5"])
+obstacles_list.append([westchair6, "westchair6"])
+obstacles_list.append([westchair7, "westchair7"])
+
+obstacles_list.append([eastchair1, "eastchair1"])
+obstacles_list.append([eastchair2, "eastchair2"])
+obstacles_list.append([eastchair3, "eastchair3"])
+
+obstacles_list.append([middlechair1, "middlechair1"])
+obstacles_list.append([middlechair2, "middlechair2"])
+obstacles_list.append([middlechair3, "middlechair3"])
+
+obstacles_list.append([table1, "table1"])
+obstacles_list.append([table2, "table2"])
+obstacles_list.append([table3, "table3"])
 """
-    End: Append all obstacles to the obstacles_list in here
+    End: P2 Append all obstacles to the obstacles_list in here
 """
 
 """
@@ -63,7 +86,6 @@ for i in range(len(obstacles_list)):
 """
     End: Voxel down sampling
 """
-
 
 """
     This part use the door width to determine as a reference to determine the user define width,
@@ -92,16 +114,14 @@ print("door width/2:", door_width)  # 0.4681645000000003
     End: reference number
 """
 
-
 """
     ***************** User defined width *****************
     modify the value to see different path finding results
 """
-width = 0.22
+width = 0.3
 """
     ***************** End: User defined width *****************
 """
-
 
 """
     DO NOT DELETE CODES BETWEEN
@@ -113,7 +133,6 @@ right_obj_list = []
 """
     End: DO NOT DELETE CODES BETWEEN
 """
-
 
 def get_rectangle_area(point1, point2, point3, point4):
     # Length of the base
@@ -130,7 +149,7 @@ def get_rectangle_area(point1, point2, point3, point4):
     # Area of the rectangle
     area = base_length * height
 
-    print("The area of the rectangle is:", area, "square units.")
+    # print("The area of the rectangle is:", area, "square units.")
 
     return area
 
@@ -214,41 +233,41 @@ def get_section():
     sorted_a = floorbox_8points[sorted_idx]
 
     """
-        ************* The array indexs represent the 8 vertices of the floor's bounding box,
-                      it is used for define the rectangle, as the behaviour of the 8 vertices order is a little bit
-                      randomized in Open3D, therefore, sometimes it is necessary examine all 8 points and 
-                      decide which 4 vertices should be use as the rectangle vertices. 
-                      To do so: 
-                      1. uncomment print("sorted floor 8 points: ", sorted_a)
-                      2. Copy the printed 8 vertex and create a PLY file to store it
-                      3. Change the RGB value to identify the specific vertex
-                      4. Use MeshLab to view the PLY file
-                      5. Figure the 4 vertices of the floor
-                      6. Record the index of the 4 vertices
-                      7. Modify the array index of these 4 lines:
-                         rect_points.append(sorted_a[6]) -> P1
-                         rect_points.append(sorted_a[4]) -> P2
-                         rect_points.append(sorted_a[0]) -> P3
-                         rect_points.append(sorted_a[2]) -> P4
-                         P1                         P2
-                         +---------------------------+
-                         |                           |
-                         +---------------------------+
-                         P4                         P3
-                         The order should be either clockwise or anti-clockwise, otherwise the program cannot find
-                         the correct dimension info of the floor.
+            ************* P3: The array indexs represent the 8 vertices of the floor's bounding box,
+                          it is used for define the rectangle, as the behaviour of the 8 vertices order is a little bit
+                          randomized in Open3D, therefore, sometimes it is necessary examine all 8 points and 
+                          decide which 4 vertices should be use as the rectangle vertices. 
+                          To do so: 
+                          1. uncomment print("sorted floor 8 points: ", sorted_a)
+                          2. Copy the printed 8 vertex and create a PLY file to store it
+                          3. Change the RGB value to identify the specific vertex
+                          4. Use MeshLab to view the PLY file
+                          5. Figure the 4 vertices of the floor
+                          6. Record the index of the 4 vertices
+                          7. Modify the array index of these 4 lines:
+                             rect_points.append(sorted_a[4]) -> P1
+                             rect_points.append(sorted_a[0]) -> P2
+                             rect_points.append(sorted_a[2]) -> P3
+                             rect_points.append(sorted_a[6]) -> P4
+                             P1                         P2
+                             +---------------------------+
+                             |                           |
+                             +---------------------------+
+                             P4                         P3
+                             The order should be either clockwise or anti-clockwise, otherwise the program cannot find
+                             the correct dimension info of the floor.
     """
     # print("sorted floor 8 points: ", sorted_a)
     # print("\n")
     rect_points = []
-    rect_points.append(sorted_a[6])
     rect_points.append(sorted_a[4])
     rect_points.append(sorted_a[0])
     rect_points.append(sorted_a[2])
-    # 7 > 5 > 1 > 3
-    print("rect_points\n", rect_points)
+    rect_points.append(sorted_a[6])
+    # 5 > 1 > 3 > 7
+    # print("rect_points\n", rect_points)
     """
-        End of Caution
+        End of P3 Caution
     """
 
     # Get the 1/3 coordinate of the side
@@ -406,7 +425,7 @@ def check_enough_space(side, wall, obj_list):
             sub_list.extend([self_index, middle_obj_list[middle_obj_index], target_index])
 
         # both wall and middle cannot pass, so this side cannot reach destination, the length is only 1.
-        if len(node_list[i]) == 0:
+        if len(node_list[i]) == 1:
             return node_list, False
 
     return node_list, True
@@ -472,24 +491,24 @@ def find_shortest_path(path_list1, path1_can_pass, path_list2, path2_can_pass):
     for i in range(len(path_list1)):
         total_distance.append(0)
         sub_list = []
-        print("path{}: {}".format(i, path_list1[i]))
+        print("\npath{}: {}".format(i, path_list1[i]))
         for x in range(len(path_list1[i]) - 1):
             if x == 0:
                 starting_array = path_list1[i][0][0]
                 x1, y1 = starting_array[0], starting_array[1]
-                print("starting point x1: {}, y1: {}".format(x1, y1))
+                # print("starting point x1: {}, y1: {}".format(x1, y1))
             else:
                 index = path_list1[i][x][1]
                 first_pcd = path_list1[i][x][0][0]  # point cloud
                 first_pcd_points = np.asarray(first_pcd.points)
                 first_pcd_coord = first_pcd_points[index]
                 x1, y1 = first_pcd_coord[0], first_pcd_coord[1]
-                print("\nx1: {}, y1: {}".format(x1, y1))
+                # print("\nx1: {}, y1: {}".format(x1, y1))
 
             if x == len(path_list1[i]) - 2:
                 destination_array = path_list1[i][len(path_list1[i]) - 1][0]
                 x2, y2 = destination_array[0], destination_array[1]
-                print("destination x2: {}, y2: {}".format(x2, y2))
+                # print("destination x2: {}, y2: {}".format(x2, y2))
             else:
                 index = path_list1[i][x + 1][1]
                 second_pcd = path_list1[i][x + 1][0][0]  # point cloud
@@ -497,7 +516,7 @@ def find_shortest_path(path_list1, path1_can_pass, path_list2, path2_can_pass):
                 second_pcd_coord = second_pcd_points[index]
                 x2, y2 = second_pcd_coord[0], second_pcd_coord[1]
 
-            print("x2: {}, y2: {}".format(x2, y2))
+            # print("x2: {}, y2: {}".format(x2, y2))
             total_distance[i] += calculate_distance(x1, y1, x2, y2)
             sub_list.append(x1)
             sub_list.append(y1)
@@ -516,8 +535,8 @@ def find_shortest_path(path_list1, path1_can_pass, path_list2, path2_can_pass):
         if distance < shortest_distance:
             shortest_distance = distance
             shortest_distance_index = i
-    print("path{} has the shortest distance: {}".format(shortest_distance_index, shortest_distance))
-    print("\nshortest path coord:", paths_coord[shortest_distance_index])
+    print("\npath{} has the shortest distance: {}".format(shortest_distance_index, shortest_distance))
+    print("shortest path coord:", paths_coord[shortest_distance_index])
     # draw line to plot the path
     shortest_coord_array = paths_coord[shortest_distance_index]
     for i in range(len(shortest_coord_array) // 2 - 1):
@@ -560,6 +579,7 @@ print("")
 right_node_list, right_can_pass = check_enough_space("right", eastwall, right_obj_list)
 print("right_node_list:", right_node_list)
 print("right can pass?", right_can_pass)
+print("")
 
 if left_can_pass:
     left_paths = set_tree(left_node_list)
@@ -570,15 +590,15 @@ if right_can_pass:
 else:
     right_paths = []
 # Find the shortest path
+print("")
 find_shortest_path(left_paths, left_can_pass, right_paths, right_can_pass)
 
 et = time.time()
 time_diff = et - st
-print("Time used:", time_diff, "seconds")
+print("\nTime used:", time_diff, "seconds")
 """
     End: All the core functions are called here
 """
-
 
 """
     Change the corresponding variable name to visualize the 3D object in open3D,
@@ -594,7 +614,6 @@ display_list.append(westwall[0])
 """
     End: Changing variable name
 """
-
 
 """
     The below commented lines is a simple 3d coordinate pointer, which points the direction of

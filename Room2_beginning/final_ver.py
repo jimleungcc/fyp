@@ -7,7 +7,8 @@ import time
 
 st = time.time()
 """
-    P1: load all PLY files in here, modify this part to load the required obstacles and walls
+    P1: load all PLY files in here, modify this part to load the required obstacles and walls.
+    The below is a reference about how to load the PLY files correctly in this program
 """
 # load all chair PLYs in the west
 westchair1 = o3d.io.read_point_cloud("Area5_conferenceRoom1/Area_5/westchair1.ply")
