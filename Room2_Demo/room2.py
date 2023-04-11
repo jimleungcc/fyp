@@ -134,6 +134,7 @@ right_obj_list = []
     End: DO NOT DELETE CODES BETWEEN
 """
 
+
 def get_rectangle_area(point1, point2, point3, point4):
     # Length of the base
     x1, y1 = point1[0], point1[1]
@@ -388,45 +389,63 @@ def check_enough_space(side, wall, obj_list):
 
     print("width:", width)
     node_list = []
-
-    for i in range(len(obj_list)):
-        print("\nobj{}: {}".format(i, obj_list[i][1]))
-        node_list.append([])
-        sub_list = node_list[i]
-        sub_list.extend([obj_list[i]])
-        # node_list.append(obj_list[i][0])
-        # check wall can pass
-        wall_min_distance, self_index, wall_index = get_horizontal_distance(obj_list[i][0], wall[0])
-        print("obj{} to wall distance: {}".format(i, wall_min_distance))
-        if wall_min_distance >= width:
-            print("wall can pass")
+    if (len(obj_list)) == 0:  # if side object list do not have any objects
+        for i in range(len(middle_obj_list)):
+            # Compare middle object with wall
+            node_list.append([])
             sub_list = node_list[i]
-            sub_list.extend([self_index, wall, wall_index])
+            sub_list.extend([middle_obj_list[i]])
+            wall_min_distance, self_index, wall_index = get_horizontal_distance(middle_obj_list[i][0], wall[0])
+            print("mid obj{} to wall distance: {}".format(i, wall_min_distance))
+            if wall_min_distance >= width:
+                print("wall can pass")
+                sub_list = node_list[i]
+                sub_list.extend([self_index, wall, wall_index])
 
-        # check middle can pass
-        # find the closest middle object
-        middle_obj_index = 0
-        # initialize it from the first object in middle_obj_list
-        min_middle_min_distance_result = get_horizontal_distance(obj_list[i][0],
-                                                                 middle_obj_list[0][0])
-        for x in range(len(middle_obj_list)):
-            current_middle_obj_result = get_horizontal_distance(obj_list[i][0], middle_obj_list[x][0])
-            # print("comparing to middle obj{} {}: {}".format(x, middle_obj_list[x][1], middle_obj_distance))
-            if current_middle_obj_result[0] < min_middle_min_distance_result[0]:
-                min_middle_min_distance_result = current_middle_obj_result
-                middle_obj_index = x
-        print("Shortest: obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], middle_obj_index,
-                                                                             middle_obj_list[middle_obj_index][1],
-                                                                             min_middle_min_distance_result[0]))
-        min_middle_distance, self_index, target_index = min_middle_min_distance_result
-        if min_middle_distance >= width:
-            print("middle can pass")
-            sub_list = node_list[i]
-            sub_list.extend([self_index, middle_obj_list[middle_obj_index], target_index])
-
-        # both wall and middle cannot pass, so this side cannot reach destination, the length is only 1.
         if len(node_list[i]) == 1:
             return node_list, False
+
+        return node_list, True
+
+    else:
+        for i in range(len(obj_list)):
+            print("\nobj{}: {}".format(i, obj_list[i][1]))
+            node_list.append([])
+            sub_list = node_list[i]
+            sub_list.extend([obj_list[i]])
+            # node_list.append(obj_list[i][0])
+            # check wall can pass
+            wall_min_distance, self_index, wall_index = get_horizontal_distance(obj_list[i][0], wall[0])
+            print("obj{} to wall distance: {}".format(i, wall_min_distance))
+            if wall_min_distance >= width:
+                print("wall can pass")
+                sub_list = node_list[i]
+                sub_list.extend([self_index, wall, wall_index])
+
+            # check middle can pass
+            # find the closest middle object
+            middle_obj_index = 0
+            # initialize it from the first object in middle_obj_list
+            min_middle_min_distance_result = get_horizontal_distance(obj_list[i][0],
+                                                                     middle_obj_list[0][0])
+            for x in range(len(middle_obj_list)):
+                current_middle_obj_result = get_horizontal_distance(obj_list[i][0], middle_obj_list[x][0])
+                # print("comparing to middle obj{} {}: {}".format(x, middle_obj_list[x][1], middle_obj_distance))
+                if current_middle_obj_result[0] < min_middle_min_distance_result[0]:
+                    min_middle_min_distance_result = current_middle_obj_result
+                    middle_obj_index = x
+            print("Shortest: obj{} {} to middle object{} {} distance: {}".format(i, obj_list[i][1], middle_obj_index,
+                                                                                 middle_obj_list[middle_obj_index][1],
+                                                                                 min_middle_min_distance_result[0]))
+            min_middle_distance, self_index, target_index = min_middle_min_distance_result
+            if min_middle_distance >= width:
+                print("middle can pass")
+                sub_list = node_list[i]
+                sub_list.extend([self_index, middle_obj_list[middle_obj_index], target_index])
+
+            # both wall and middle cannot pass, so this side cannot reach destination, the length is only 1.
+            if len(node_list[i]) == 1:
+                return node_list, False
 
     return node_list, True
 
